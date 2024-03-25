@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS read_receipts;
+DROP TABLE IF EXISTS chat_room_participants;
+DROP TABLE IF EXISTS chat_rooms;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS follows;
+DROP TABLE IF EXISTS users;
