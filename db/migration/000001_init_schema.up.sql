@@ -47,7 +47,7 @@ CREATE TABLE "chat_room_participants" (
 CREATE TABLE "read_receipts" (
   "message_id" integer NOT NULL,
   "user_id" integer NOT NULL,
-  "read_at" timestamp NOT NULL DEFAULT 'now()'
+  "read_at" timestamp
 );
 
 COMMENT ON COLUMN "posts"."body" IS 'Content of the post';

@@ -10,12 +10,33 @@ import (
 )
 
 type Querier interface {
+	AddChatRoomParticipant(ctx context.Context, arg AddChatRoomParticipantParams) (ChatRoomParticipant, error)
 	CreateAccount(ctx context.Context, arg CreateAccountParams) (User, error)
+	CreateChatRoom(ctx context.Context, name string) (ChatRoom, error)
+	CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error)
+	CreatePost(ctx context.Context, arg CreatePostParams) (Post, error)
+	CreateReadReceipt(ctx context.Context, arg CreateReadReceiptParams) (ReadReceipt, error)
 	DeleteAccount(ctx context.Context, id int32) error
+	DeleteChatRoom(ctx context.Context, id int32) error
+	DeleteChatRoomParticipant(ctx context.Context, userID int32) error
+	DeleteMessage(ctx context.Context, id int32) error
+	DeletePost(ctx context.Context, id int32) error
 	GetAccount(ctx context.Context, id int32) (User, error)
 	GetAccountByUsername(ctx context.Context, username sql.NullString) (User, error)
+	GetChatRoom(ctx context.Context, id int32) (ChatRoom, error)
+	GetChatRoomParticipant(ctx context.Context, userID int32) (ChatRoomParticipant, error)
+	GetChatRoomParticipants(ctx context.Context, arg GetChatRoomParticipantsParams) ([]ChatRoomParticipant, error)
+	GetChatRooms(ctx context.Context, arg GetChatRoomsParams) ([]ChatRoom, error)
+	GetMessage(ctx context.Context, id int32) (Message, error)
+	GetMessages(ctx context.Context, arg GetMessagesParams) ([]Message, error)
+	GetPost(ctx context.Context, id int32) (Post, error)
+	GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, error)
+	GetReadReceipt(ctx context.Context, messageID int32) (ReadReceipt, error)
 	GetUsers(ctx context.Context, arg GetUsersParams) ([]User, error)
 	UpdateAccount(ctx context.Context, arg UpdateAccountParams) (User, error)
+	UpdateChatRoom(ctx context.Context, arg UpdateChatRoomParams) (ChatRoom, error)
+	UpdateMessage(ctx context.Context, arg UpdateMessageParams) (Message, error)
+	UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, error)
 }
 
 var _ Querier = (*Queries)(nil)

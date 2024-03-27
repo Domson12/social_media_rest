@@ -46,9 +46,9 @@ type Post struct {
 }
 
 type ReadReceipt struct {
-	MessageID int32     `json:"message_id"`
-	UserID    int32     `json:"user_id"`
-	ReadAt    time.Time `json:"read_at"`
+	MessageID int32        `json:"message_id"`
+	UserID    int32        `json:"user_id"`
+	ReadAt    sql.NullTime `json:"read_at"`
 }
 
 type User struct {
