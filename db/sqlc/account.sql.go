@@ -21,7 +21,7 @@ role,
 last_activity_at
 ) VALUES (
 $1, $2, $3, $4, $5, $6
-) RETURNING id, username, email, profile_picture, bio, role, last_activity_at, created_at
+) RETURNING id, username, email, bio, role, profile_picture, created_at, last_activity_at
 `
 
 type CreateAccountParams struct {
@@ -47,11 +47,143 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (U
 		&i.ID,
 		&i.Username,
 		&i.Email,
-		&i.ProfilePicture,
 		&i.Bio,
 		&i.Role,
-		&i.LastActivityAt,
+		&i.ProfilePicture,
 		&i.CreatedAt,
+		&i.LastActivityAt,
+	)
+	return i, err
+}
+
+const deleteAccount = `-- name: DeleteAccount :exec
+DELETE FROM users WHERE id = $1
+`
+
+func (q *Queries) DeleteAccount(ctx context.Context, id int32) error {
+	_, err := q.exec(ctx, q.deleteAccountStmt, deleteAccount, id)
+	return err
+}
+
+const getAccount = `-- name: GetAccount :one
+SELECT id, username, email, bio, role, profile_picture, created_at, last_activity_at FROM users 
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetAccount(ctx context.Context, id int32) (User, error) {
+	row := q.queryRow(ctx, q.getAccountStmt, getAccount, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Bio,
+		&i.Role,
+		&i.ProfilePicture,
+		&i.CreatedAt,
+		&i.LastActivityAt,
+	)
+	return i, err
+}
+
+const getAccountByUsername = `-- name: GetAccountByUsername :one
+SELECT id, username, email, bio, role, profile_picture, created_at, last_activity_at FROM users WHERE username = $1 LIMIT 1
+`
+
+func (q *Queries) GetAccountByUsername(ctx context.Context, username sql.NullString) (User, error) {
+	row := q.queryRow(ctx, q.getAccountByUsernameStmt, getAccountByUsername, username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Bio,
+		&i.Role,
+		&i.ProfilePicture,
+		&i.CreatedAt,
+		&i.LastActivityAt,
+	)
+	return i, err
+}
+
+const getUsers = `-- name: GetUsers :many
+SELECT id, username, email, bio, role, profile_picture, created_at, last_activity_at FROM users
+LIMIT $1 OFFSET $2
+`
+
+type GetUsersParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetUsers(ctx context.Context, arg GetUsersParams) ([]User, error) {
+	rows, err := q.query(ctx, q.getUsersStmt, getUsers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Email,
+			&i.Bio,
+			&i.Role,
+			&i.ProfilePicture,
+			&i.CreatedAt,
+			&i.LastActivityAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateAccount = `-- name: UpdateAccount :one
+UPDATE users SET
+username = $2,
+email = $3,
+profile_picture = $4,
+bio = $5
+WHERE id = $1
+RETURNING id, username, email, bio, role, profile_picture, created_at, last_activity_at
+`
+
+type UpdateAccountParams struct {
+	ID             int32          `json:"id"`
+	Username       sql.NullString `json:"username"`
+	Email          string         `json:"email"`
+	ProfilePicture sql.NullString `json:"profile_picture"`
+	Bio            sql.NullString `json:"bio"`
+}
+
+func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (User, error) {
+	row := q.queryRow(ctx, q.updateAccountStmt, updateAccount,
+		arg.ID,
+		arg.Username,
+		arg.Email,
+		arg.ProfilePicture,
+		arg.Bio,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Bio,
+		&i.Role,
+		&i.ProfilePicture,
+		&i.CreatedAt,
+		&i.LastActivityAt,
 	)
 	return i, err
 }

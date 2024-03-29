@@ -24,17 +24,305 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.addChatRoomParticipantStmt, err = db.PrepareContext(ctx, addChatRoomParticipant); err != nil {
+		return nil, fmt.Errorf("error preparing query AddChatRoomParticipant: %w", err)
+	}
+	if q.addCommentStmt, err = db.PrepareContext(ctx, addComment); err != nil {
+		return nil, fmt.Errorf("error preparing query AddComment: %w", err)
+	}
 	if q.createAccountStmt, err = db.PrepareContext(ctx, createAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateAccount: %w", err)
+	}
+	if q.createChatRoomStmt, err = db.PrepareContext(ctx, createChatRoom); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateChatRoom: %w", err)
+	}
+	if q.createMessageStmt, err = db.PrepareContext(ctx, createMessage); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateMessage: %w", err)
+	}
+	if q.createPostStmt, err = db.PrepareContext(ctx, createPost); err != nil {
+		return nil, fmt.Errorf("error preparing query CreatePost: %w", err)
+	}
+	if q.createReadReceiptStmt, err = db.PrepareContext(ctx, createReadReceipt); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateReadReceipt: %w", err)
+	}
+	if q.deleteAccountStmt, err = db.PrepareContext(ctx, deleteAccount); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteAccount: %w", err)
+	}
+	if q.deleteChatRoomStmt, err = db.PrepareContext(ctx, deleteChatRoom); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteChatRoom: %w", err)
+	}
+	if q.deleteChatRoomParticipantStmt, err = db.PrepareContext(ctx, deleteChatRoomParticipant); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteChatRoomParticipant: %w", err)
+	}
+	if q.deleteCommentStmt, err = db.PrepareContext(ctx, deleteComment); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteComment: %w", err)
+	}
+	if q.deleteMessageStmt, err = db.PrepareContext(ctx, deleteMessage); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteMessage: %w", err)
+	}
+	if q.deletePostStmt, err = db.PrepareContext(ctx, deletePost); err != nil {
+		return nil, fmt.Errorf("error preparing query DeletePost: %w", err)
+	}
+	if q.getAccountStmt, err = db.PrepareContext(ctx, getAccount); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAccount: %w", err)
+	}
+	if q.getAccountByUsernameStmt, err = db.PrepareContext(ctx, getAccountByUsername); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAccountByUsername: %w", err)
+	}
+	if q.getChatRoomStmt, err = db.PrepareContext(ctx, getChatRoom); err != nil {
+		return nil, fmt.Errorf("error preparing query GetChatRoom: %w", err)
+	}
+	if q.getChatRoomParticipantStmt, err = db.PrepareContext(ctx, getChatRoomParticipant); err != nil {
+		return nil, fmt.Errorf("error preparing query GetChatRoomParticipant: %w", err)
+	}
+	if q.getChatRoomParticipantsStmt, err = db.PrepareContext(ctx, getChatRoomParticipants); err != nil {
+		return nil, fmt.Errorf("error preparing query GetChatRoomParticipants: %w", err)
+	}
+	if q.getChatRoomsStmt, err = db.PrepareContext(ctx, getChatRooms); err != nil {
+		return nil, fmt.Errorf("error preparing query GetChatRooms: %w", err)
+	}
+	if q.getCommentStmt, err = db.PrepareContext(ctx, getComment); err != nil {
+		return nil, fmt.Errorf("error preparing query GetComment: %w", err)
+	}
+	if q.getCommentsStmt, err = db.PrepareContext(ctx, getComments); err != nil {
+		return nil, fmt.Errorf("error preparing query GetComments: %w", err)
+	}
+	if q.getLikesStmt, err = db.PrepareContext(ctx, getLikes); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLikes: %w", err)
+	}
+	if q.getLikesByPostIdStmt, err = db.PrepareContext(ctx, getLikesByPostId); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLikesByPostId: %w", err)
+	}
+	if q.getLikesByUserIdStmt, err = db.PrepareContext(ctx, getLikesByUserId); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLikesByUserId: %w", err)
+	}
+	if q.getMessageStmt, err = db.PrepareContext(ctx, getMessage); err != nil {
+		return nil, fmt.Errorf("error preparing query GetMessage: %w", err)
+	}
+	if q.getMessagesStmt, err = db.PrepareContext(ctx, getMessages); err != nil {
+		return nil, fmt.Errorf("error preparing query GetMessages: %w", err)
+	}
+	if q.getPostStmt, err = db.PrepareContext(ctx, getPost); err != nil {
+		return nil, fmt.Errorf("error preparing query GetPost: %w", err)
+	}
+	if q.getPostsStmt, err = db.PrepareContext(ctx, getPosts); err != nil {
+		return nil, fmt.Errorf("error preparing query GetPosts: %w", err)
+	}
+	if q.getReadReceiptStmt, err = db.PrepareContext(ctx, getReadReceipt); err != nil {
+		return nil, fmt.Errorf("error preparing query GetReadReceipt: %w", err)
+	}
+	if q.getUsersStmt, err = db.PrepareContext(ctx, getUsers); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUsers: %w", err)
+	}
+	if q.likePostStmt, err = db.PrepareContext(ctx, likePost); err != nil {
+		return nil, fmt.Errorf("error preparing query LikePost: %w", err)
+	}
+	if q.unlikePostStmt, err = db.PrepareContext(ctx, unlikePost); err != nil {
+		return nil, fmt.Errorf("error preparing query UnlikePost: %w", err)
+	}
+	if q.updateAccountStmt, err = db.PrepareContext(ctx, updateAccount); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateAccount: %w", err)
+	}
+	if q.updateChatRoomStmt, err = db.PrepareContext(ctx, updateChatRoom); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateChatRoom: %w", err)
+	}
+	if q.updateCommentStmt, err = db.PrepareContext(ctx, updateComment); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateComment: %w", err)
+	}
+	if q.updateMessageStmt, err = db.PrepareContext(ctx, updateMessage); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateMessage: %w", err)
+	}
+	if q.updatePostStmt, err = db.PrepareContext(ctx, updatePost); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdatePost: %w", err)
 	}
 	return &q, nil
 }
 
 func (q *Queries) Close() error {
 	var err error
+	if q.addChatRoomParticipantStmt != nil {
+		if cerr := q.addChatRoomParticipantStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addChatRoomParticipantStmt: %w", cerr)
+		}
+	}
+	if q.addCommentStmt != nil {
+		if cerr := q.addCommentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addCommentStmt: %w", cerr)
+		}
+	}
 	if q.createAccountStmt != nil {
 		if cerr := q.createAccountStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createAccountStmt: %w", cerr)
+		}
+	}
+	if q.createChatRoomStmt != nil {
+		if cerr := q.createChatRoomStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createChatRoomStmt: %w", cerr)
+		}
+	}
+	if q.createMessageStmt != nil {
+		if cerr := q.createMessageStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createMessageStmt: %w", cerr)
+		}
+	}
+	if q.createPostStmt != nil {
+		if cerr := q.createPostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createPostStmt: %w", cerr)
+		}
+	}
+	if q.createReadReceiptStmt != nil {
+		if cerr := q.createReadReceiptStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createReadReceiptStmt: %w", cerr)
+		}
+	}
+	if q.deleteAccountStmt != nil {
+		if cerr := q.deleteAccountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteAccountStmt: %w", cerr)
+		}
+	}
+	if q.deleteChatRoomStmt != nil {
+		if cerr := q.deleteChatRoomStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteChatRoomStmt: %w", cerr)
+		}
+	}
+	if q.deleteChatRoomParticipantStmt != nil {
+		if cerr := q.deleteChatRoomParticipantStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteChatRoomParticipantStmt: %w", cerr)
+		}
+	}
+	if q.deleteCommentStmt != nil {
+		if cerr := q.deleteCommentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteCommentStmt: %w", cerr)
+		}
+	}
+	if q.deleteMessageStmt != nil {
+		if cerr := q.deleteMessageStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteMessageStmt: %w", cerr)
+		}
+	}
+	if q.deletePostStmt != nil {
+		if cerr := q.deletePostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deletePostStmt: %w", cerr)
+		}
+	}
+	if q.getAccountStmt != nil {
+		if cerr := q.getAccountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAccountStmt: %w", cerr)
+		}
+	}
+	if q.getAccountByUsernameStmt != nil {
+		if cerr := q.getAccountByUsernameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAccountByUsernameStmt: %w", cerr)
+		}
+	}
+	if q.getChatRoomStmt != nil {
+		if cerr := q.getChatRoomStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getChatRoomStmt: %w", cerr)
+		}
+	}
+	if q.getChatRoomParticipantStmt != nil {
+		if cerr := q.getChatRoomParticipantStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getChatRoomParticipantStmt: %w", cerr)
+		}
+	}
+	if q.getChatRoomParticipantsStmt != nil {
+		if cerr := q.getChatRoomParticipantsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getChatRoomParticipantsStmt: %w", cerr)
+		}
+	}
+	if q.getChatRoomsStmt != nil {
+		if cerr := q.getChatRoomsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getChatRoomsStmt: %w", cerr)
+		}
+	}
+	if q.getCommentStmt != nil {
+		if cerr := q.getCommentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getCommentStmt: %w", cerr)
+		}
+	}
+	if q.getCommentsStmt != nil {
+		if cerr := q.getCommentsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getCommentsStmt: %w", cerr)
+		}
+	}
+	if q.getLikesStmt != nil {
+		if cerr := q.getLikesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLikesStmt: %w", cerr)
+		}
+	}
+	if q.getLikesByPostIdStmt != nil {
+		if cerr := q.getLikesByPostIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLikesByPostIdStmt: %w", cerr)
+		}
+	}
+	if q.getLikesByUserIdStmt != nil {
+		if cerr := q.getLikesByUserIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLikesByUserIdStmt: %w", cerr)
+		}
+	}
+	if q.getMessageStmt != nil {
+		if cerr := q.getMessageStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getMessageStmt: %w", cerr)
+		}
+	}
+	if q.getMessagesStmt != nil {
+		if cerr := q.getMessagesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getMessagesStmt: %w", cerr)
+		}
+	}
+	if q.getPostStmt != nil {
+		if cerr := q.getPostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getPostStmt: %w", cerr)
+		}
+	}
+	if q.getPostsStmt != nil {
+		if cerr := q.getPostsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getPostsStmt: %w", cerr)
+		}
+	}
+	if q.getReadReceiptStmt != nil {
+		if cerr := q.getReadReceiptStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getReadReceiptStmt: %w", cerr)
+		}
+	}
+	if q.getUsersStmt != nil {
+		if cerr := q.getUsersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUsersStmt: %w", cerr)
+		}
+	}
+	if q.likePostStmt != nil {
+		if cerr := q.likePostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing likePostStmt: %w", cerr)
+		}
+	}
+	if q.unlikePostStmt != nil {
+		if cerr := q.unlikePostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing unlikePostStmt: %w", cerr)
+		}
+	}
+	if q.updateAccountStmt != nil {
+		if cerr := q.updateAccountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateAccountStmt: %w", cerr)
+		}
+	}
+	if q.updateChatRoomStmt != nil {
+		if cerr := q.updateChatRoomStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateChatRoomStmt: %w", cerr)
+		}
+	}
+	if q.updateCommentStmt != nil {
+		if cerr := q.updateCommentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateCommentStmt: %w", cerr)
+		}
+	}
+	if q.updateMessageStmt != nil {
+		if cerr := q.updateMessageStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateMessageStmt: %w", cerr)
+		}
+	}
+	if q.updatePostStmt != nil {
+		if cerr := q.updatePostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updatePostStmt: %w", cerr)
 		}
 	}
 	return err
@@ -74,15 +362,87 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                DBTX
-	tx                *sql.Tx
-	createAccountStmt *sql.Stmt
+	db                            DBTX
+	tx                            *sql.Tx
+	addChatRoomParticipantStmt    *sql.Stmt
+	addCommentStmt                *sql.Stmt
+	createAccountStmt             *sql.Stmt
+	createChatRoomStmt            *sql.Stmt
+	createMessageStmt             *sql.Stmt
+	createPostStmt                *sql.Stmt
+	createReadReceiptStmt         *sql.Stmt
+	deleteAccountStmt             *sql.Stmt
+	deleteChatRoomStmt            *sql.Stmt
+	deleteChatRoomParticipantStmt *sql.Stmt
+	deleteCommentStmt             *sql.Stmt
+	deleteMessageStmt             *sql.Stmt
+	deletePostStmt                *sql.Stmt
+	getAccountStmt                *sql.Stmt
+	getAccountByUsernameStmt      *sql.Stmt
+	getChatRoomStmt               *sql.Stmt
+	getChatRoomParticipantStmt    *sql.Stmt
+	getChatRoomParticipantsStmt   *sql.Stmt
+	getChatRoomsStmt              *sql.Stmt
+	getCommentStmt                *sql.Stmt
+	getCommentsStmt               *sql.Stmt
+	getLikesStmt                  *sql.Stmt
+	getLikesByPostIdStmt          *sql.Stmt
+	getLikesByUserIdStmt          *sql.Stmt
+	getMessageStmt                *sql.Stmt
+	getMessagesStmt               *sql.Stmt
+	getPostStmt                   *sql.Stmt
+	getPostsStmt                  *sql.Stmt
+	getReadReceiptStmt            *sql.Stmt
+	getUsersStmt                  *sql.Stmt
+	likePostStmt                  *sql.Stmt
+	unlikePostStmt                *sql.Stmt
+	updateAccountStmt             *sql.Stmt
+	updateChatRoomStmt            *sql.Stmt
+	updateCommentStmt             *sql.Stmt
+	updateMessageStmt             *sql.Stmt
+	updatePostStmt                *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                tx,
-		tx:                tx,
-		createAccountStmt: q.createAccountStmt,
+		db:                            tx,
+		tx:                            tx,
+		addChatRoomParticipantStmt:    q.addChatRoomParticipantStmt,
+		addCommentStmt:                q.addCommentStmt,
+		createAccountStmt:             q.createAccountStmt,
+		createChatRoomStmt:            q.createChatRoomStmt,
+		createMessageStmt:             q.createMessageStmt,
+		createPostStmt:                q.createPostStmt,
+		createReadReceiptStmt:         q.createReadReceiptStmt,
+		deleteAccountStmt:             q.deleteAccountStmt,
+		deleteChatRoomStmt:            q.deleteChatRoomStmt,
+		deleteChatRoomParticipantStmt: q.deleteChatRoomParticipantStmt,
+		deleteCommentStmt:             q.deleteCommentStmt,
+		deleteMessageStmt:             q.deleteMessageStmt,
+		deletePostStmt:                q.deletePostStmt,
+		getAccountStmt:                q.getAccountStmt,
+		getAccountByUsernameStmt:      q.getAccountByUsernameStmt,
+		getChatRoomStmt:               q.getChatRoomStmt,
+		getChatRoomParticipantStmt:    q.getChatRoomParticipantStmt,
+		getChatRoomParticipantsStmt:   q.getChatRoomParticipantsStmt,
+		getChatRoomsStmt:              q.getChatRoomsStmt,
+		getCommentStmt:                q.getCommentStmt,
+		getCommentsStmt:               q.getCommentsStmt,
+		getLikesStmt:                  q.getLikesStmt,
+		getLikesByPostIdStmt:          q.getLikesByPostIdStmt,
+		getLikesByUserIdStmt:          q.getLikesByUserIdStmt,
+		getMessageStmt:                q.getMessageStmt,
+		getMessagesStmt:               q.getMessagesStmt,
+		getPostStmt:                   q.getPostStmt,
+		getPostsStmt:                  q.getPostsStmt,
+		getReadReceiptStmt:            q.getReadReceiptStmt,
+		getUsersStmt:                  q.getUsersStmt,
+		likePostStmt:                  q.likePostStmt,
+		unlikePostStmt:                q.unlikePostStmt,
+		updateAccountStmt:             q.updateAccountStmt,
+		updateChatRoomStmt:            q.updateChatRoomStmt,
+		updateCommentStmt:             q.updateCommentStmt,
+		updateMessageStmt:             q.updateMessageStmt,
+		updatePostStmt:                q.updatePostStmt,
 	}
 }
