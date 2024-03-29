@@ -11,10 +11,11 @@ import (
 
 func CreateRandomReadReceipt(t *testing.T) ReadReceipt {
 	message := CreateRandomMessage(t)
+	user := createRandomUser(t)
 
 	arg := CreateReadReceiptParams{
 		MessageID: message.ID,
-		UserID:    message.ReceiverUserID,
+		UserID:    user.ID,
 		ReadAt:    sql.NullTime{Time: time.Now(), Valid: true},
 	}
 	readReceipt, err := testQueries.CreateReadReceipt(context.Background(), arg)

@@ -11,15 +11,13 @@ import (
 func CreateRandomMessage(t *testing.T) Message {
 
 	user1 := createRandomUser(t)
-	user2 := createRandomUser(t)
 	chatRoom := CreateRandomChatRoom(t)
 
 	arg := CreateMessageParams{
-		SenderUserID:   user1.ID,
-		ReceiverUserID: user2.ID,
-		ChatRoomID:     chatRoom.ID,
-		Text:           sql.NullString{String: "Hello", Valid: true},
-		Status:         "sent",
+		SenderUserID: user1.ID,
+		ChatRoomID:   chatRoom.ID,
+		Text:         sql.NullString{String: "Hello", Valid: true},
+		Status:       "sent",
 	}
 
 	message, err := testQueries.CreateMessage(context.Background(), arg)
@@ -27,7 +25,6 @@ func CreateRandomMessage(t *testing.T) Message {
 	require.NotEmpty(t, message)
 
 	require.Equal(t, arg.SenderUserID, message.SenderUserID)
-	require.Equal(t, arg.ReceiverUserID, message.ReceiverUserID)
 	require.Equal(t, arg.Text, message.Text)
 	require.Equal(t, arg.Status, message.Status)
 
@@ -45,7 +42,6 @@ func TestGetMessage(t *testing.T) {
 	require.NotEmpty(t, message2)
 
 	require.Equal(t, message1.SenderUserID, message2.SenderUserID)
-	require.Equal(t, message1.ReceiverUserID, message2.ReceiverUserID)
 	require.Equal(t, message1.Text, message2.Text)
 	require.Equal(t, message1.Status, message2.Status)
 }

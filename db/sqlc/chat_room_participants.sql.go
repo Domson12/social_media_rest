@@ -67,7 +67,7 @@ func (q *Queries) GetChatRoomParticipants(ctx context.Context, arg GetChatRoomPa
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ChatRoomParticipant
+	items := []ChatRoomParticipant{}
 	for rows.Next() {
 		var i ChatRoomParticipant
 		if err := rows.Scan(&i.ChatRoomID, &i.UserID); err != nil {

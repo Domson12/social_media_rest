@@ -13,27 +13,24 @@ import (
 const createMessage = `-- name: CreateMessage :one
 INSERT INTO messages (
 sender_user_id,
-receiver_user_id,
 chat_room_id,
 text,
 status
 ) VALUES (
-$1, $2, $3, $4, $5
-) RETURNING id, chat_room_id, sender_user_id, receiver_user_id, text, created_at, status
+$1, $2, $3, $4
+) RETURNING id, chat_room_id, sender_user_id, text, created_at, status
 `
 
 type CreateMessageParams struct {
-	SenderUserID   int32          `json:"sender_user_id"`
-	ReceiverUserID int32          `json:"receiver_user_id"`
-	ChatRoomID     int32          `json:"chat_room_id"`
-	Text           sql.NullString `json:"text"`
-	Status         string         `json:"status"`
+	SenderUserID int32          `json:"sender_user_id"`
+	ChatRoomID   int32          `json:"chat_room_id"`
+	Text         sql.NullString `json:"text"`
+	Status       string         `json:"status"`
 }
 
 func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error) {
 	row := q.queryRow(ctx, q.createMessageStmt, createMessage,
 		arg.SenderUserID,
-		arg.ReceiverUserID,
 		arg.ChatRoomID,
 		arg.Text,
 		arg.Status,
@@ -43,7 +40,6 @@ func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (M
 		&i.ID,
 		&i.ChatRoomID,
 		&i.SenderUserID,
-		&i.ReceiverUserID,
 		&i.Text,
 		&i.CreatedAt,
 		&i.Status,
@@ -61,7 +57,7 @@ func (q *Queries) DeleteMessage(ctx context.Context, id int32) error {
 }
 
 const getMessage = `-- name: GetMessage :one
-SELECT id, chat_room_id, sender_user_id, receiver_user_id, text, created_at, status FROM messages 
+SELECT id, chat_room_id, sender_user_id, text, created_at, status FROM messages 
 WHERE id = $1 LIMIT 1
 `
 
@@ -72,7 +68,6 @@ func (q *Queries) GetMessage(ctx context.Context, id int32) (Message, error) {
 		&i.ID,
 		&i.ChatRoomID,
 		&i.SenderUserID,
-		&i.ReceiverUserID,
 		&i.Text,
 		&i.CreatedAt,
 		&i.Status,
@@ -81,7 +76,7 @@ func (q *Queries) GetMessage(ctx context.Context, id int32) (Message, error) {
 }
 
 const getMessages = `-- name: GetMessages :many
-SELECT id, chat_room_id, sender_user_id, receiver_user_id, text, created_at, status FROM messages
+SELECT id, chat_room_id, sender_user_id, text, created_at, status FROM messages
 LIMIT $1 OFFSET $2
 `
 
@@ -96,14 +91,13 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Mes
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Message
+	items := []Message{}
 	for rows.Next() {
 		var i Message
 		if err := rows.Scan(
 			&i.ID,
 			&i.ChatRoomID,
 			&i.SenderUserID,
-			&i.ReceiverUserID,
 			&i.Text,
 			&i.CreatedAt,
 			&i.Status,
@@ -125,7 +119,7 @@ const updateMessage = `-- name: UpdateMessage :one
 UPDATE messages SET
 text = $1,
 status = $2
-WHERE id = $3 RETURNING id, chat_room_id, sender_user_id, receiver_user_id, text, created_at, status
+WHERE id = $3 RETURNING id, chat_room_id, sender_user_id, text, created_at, status
 `
 
 type UpdateMessageParams struct {
@@ -141,7 +135,6 @@ func (q *Queries) UpdateMessage(ctx context.Context, arg UpdateMessageParams) (M
 		&i.ID,
 		&i.ChatRoomID,
 		&i.SenderUserID,
-		&i.ReceiverUserID,
 		&i.Text,
 		&i.CreatedAt,
 		&i.Status,

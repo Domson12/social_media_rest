@@ -1,27 +1,28 @@
--- name: CreateAccount :one
+-- name: CreateUser :one
 INSERT INTO users (
 username,
 email,
+password,
 profile_picture,
 bio,
 role,
 last_activity_at
 ) VALUES (
-$1, $2, $3, $4, $5, $6
+$1, $2, $3, $4, $5, $6, $7
 ) RETURNING *;
 
--- name: GetAccount :one
-SELECT * FROM users 
+-- name: GetUser :one
+SELECT * FROM users
 WHERE id = $1 LIMIT 1;
 
--- name: GetAccountByUsername :one
+-- name: GetUserByUsername :one
 SELECT * FROM users WHERE username = $1 LIMIT 1;
 
 -- name: GetUsers :many
 SELECT * FROM users
 LIMIT $1 OFFSET $2;
 
--- name: UpdateAccount :one
+-- name: UpdateUser :one
 UPDATE users SET
 username = $2,
 email = $3,
@@ -30,5 +31,5 @@ bio = $5
 WHERE id = $1
 RETURNING *;
 
--- name: DeleteAccount :exec
+-- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;

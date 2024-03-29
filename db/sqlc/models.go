@@ -42,13 +42,12 @@ type Like struct {
 }
 
 type Message struct {
-	ID             int32          `json:"id"`
-	ChatRoomID     int32          `json:"chat_room_id"`
-	SenderUserID   int32          `json:"sender_user_id"`
-	ReceiverUserID int32          `json:"receiver_user_id"`
-	Text           sql.NullString `json:"text"`
-	CreatedAt      time.Time      `json:"created_at"`
-	Status         string         `json:"status"`
+	ID           int32          `json:"id"`
+	ChatRoomID   int32          `json:"chat_room_id"`
+	SenderUserID int32          `json:"sender_user_id"`
+	Text         sql.NullString `json:"text"`
+	CreatedAt    time.Time      `json:"created_at"`
+	Status       string         `json:"status"`
 }
 
 type Post struct {
@@ -56,7 +55,7 @@ type Post struct {
 	Title sql.NullString `json:"title"`
 	// Content of the post
 	Body          sql.NullString `json:"body"`
-	Likes         int32          `json:"likes"`
+	LikesCount    int32          `json:"likes_count"`
 	CommentsCount int32          `json:"comments_count"`
 	UserID        int32          `json:"user_id"`
 	Status        string         `json:"status"`
@@ -73,6 +72,9 @@ type User struct {
 	ID             int32          `json:"id"`
 	Username       sql.NullString `json:"username"`
 	Email          string         `json:"email"`
+	Password       string         `json:"password"`
+	FollowingCount sql.NullInt32  `json:"following_count"`
+	FollowedCount  sql.NullInt32  `json:"followed_count"`
 	Bio            sql.NullString `json:"bio"`
 	Role           string         `json:"role"`
 	ProfilePicture sql.NullString `json:"profile_picture"`

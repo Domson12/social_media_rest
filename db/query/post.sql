@@ -3,7 +3,7 @@ INSERT INTO posts (
 title,
 body,
 user_id,
-likes,
+likes_count,
 comments_count,
 status
 ) VALUES (

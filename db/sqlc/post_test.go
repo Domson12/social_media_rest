@@ -14,7 +14,7 @@ func createRandomPost(t *testing.T) Post {
 		Title:         sql.NullString{String: "Hello", Valid: true},
 		Body:          sql.NullString{String: "Hello", Valid: true},
 		UserID:        user.ID,
-		Likes:         0,
+		LikesCount:    0,
 		CommentsCount: 0,
 		Status:        "active",
 	}

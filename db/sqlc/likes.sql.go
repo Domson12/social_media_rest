@@ -19,7 +19,7 @@ func (q *Queries) GetLikes(ctx context.Context) ([]Like, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Like
+	items := []Like{}
 	for rows.Next() {
 		var i Like
 		if err := rows.Scan(
@@ -52,7 +52,7 @@ func (q *Queries) GetLikesByPostId(ctx context.Context, postID int32) ([]Like, e
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Like
+	items := []Like{}
 	for rows.Next() {
 		var i Like
 		if err := rows.Scan(
@@ -85,7 +85,7 @@ func (q *Queries) GetLikesByUserId(ctx context.Context, userID int32) ([]Like, e
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Like
+	items := []Like{}
 	for rows.Next() {
 		var i Like
 		if err := rows.Scan(

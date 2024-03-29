@@ -47,10 +47,9 @@ type CreateChatRoomTxResult struct {
 }
 
 type CreateMessageTxParams struct {
-	SenderUserID   int32  `json:"sender_user_id"`
-	ReceiverUserID int32  `json:"receiver_user_id"`
-	ChatRoomID     int32  `json:"chat_room_id"`
-	Text           string `json:"text"`
+	SenderUserID int32  `json:"sender_user_id"`
+	ChatRoomID   int32  `json:"chat_room_id"`
+	Text         string `json:"text"`
 }
 
 type CreateMessageTxResult struct {
@@ -77,40 +76,6 @@ func (store *Store) CreateChatRoomTx(ctx context.Context, arg CreateChatRoomTxPa
 		}
 
 		result.ChatRoom = chatRoom
-
-		return nil
-	})
-
-	return result, err
-}
-
-// create a message with a read receipt
-func (store *Store) CreateMessageTx(ctx context.Context, arg CreateMessageTxParams) (CreateMessageTxResult, error) {
-
-	var result CreateMessageTxResult
-
-	err := store.execTx(ctx, func(q *Queries) error {
-		message, errTx := q.CreateMessage(ctx, CreateMessageParams{
-			SenderUserID:   arg.SenderUserID,
-			ReceiverUserID: arg.ReceiverUserID,
-			ChatRoomID:     arg.ChatRoomID,
-			Text:           sql.NullString{String: arg.Text, Valid: true},
-			Status:         "sent",
-		})
-		if errTx != nil {
-			return errTx
-		}
-
-		_, errTx = q.CreateReadReceipt(ctx, CreateReadReceiptParams{
-			MessageID: message.ID,
-			UserID:    arg.ReceiverUserID,
-			ReadAt:    sql.NullTime{Valid: false},
-		})
-		if errTx != nil {
-			return errTx
-		}
-
-		result.Message = message
 
 		return nil
 	})
