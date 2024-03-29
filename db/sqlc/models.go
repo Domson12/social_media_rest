@@ -20,14 +20,30 @@ type ChatRoomParticipant struct {
 	UserID     int32 `json:"user_id"`
 }
 
+type Comment struct {
+	ID        int32     `json:"id"`
+	PostID    int32     `json:"post_id"`
+	UserID    int32     `json:"user_id"`
+	Text      string    `json:"text"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Follow struct {
 	FollowingUserID int32     `json:"following_user_id"`
 	FollowedUserID  int32     `json:"followed_user_id"`
 	CreatedAt       time.Time `json:"created_at"`
 }
 
+type Like struct {
+	ID        int32     `json:"id"`
+	PostID    int32     `json:"post_id"`
+	UserID    int32     `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Message struct {
 	ID             int32          `json:"id"`
+	ChatRoomID     int32          `json:"chat_room_id"`
 	SenderUserID   int32          `json:"sender_user_id"`
 	ReceiverUserID int32          `json:"receiver_user_id"`
 	Text           sql.NullString `json:"text"`
@@ -39,10 +55,12 @@ type Post struct {
 	ID    int32          `json:"id"`
 	Title sql.NullString `json:"title"`
 	// Content of the post
-	Body      sql.NullString `json:"body"`
-	UserID    int32          `json:"user_id"`
-	Status    string         `json:"status"`
-	CreatedAt time.Time      `json:"created_at"`
+	Body          sql.NullString `json:"body"`
+	Likes         int32          `json:"likes"`
+	CommentsCount int32          `json:"comments_count"`
+	UserID        int32          `json:"user_id"`
+	Status        string         `json:"status"`
+	CreatedAt     time.Time      `json:"created_at"`
 }
 
 type ReadReceipt struct {
@@ -55,9 +73,9 @@ type User struct {
 	ID             int32          `json:"id"`
 	Username       sql.NullString `json:"username"`
 	Email          string         `json:"email"`
-	ProfilePicture sql.NullString `json:"profile_picture"`
 	Bio            sql.NullString `json:"bio"`
 	Role           string         `json:"role"`
-	LastActivityAt time.Time      `json:"last_activity_at"`
+	ProfilePicture sql.NullString `json:"profile_picture"`
 	CreatedAt      time.Time      `json:"created_at"`
+	LastActivityAt time.Time      `json:"last_activity_at"`
 }

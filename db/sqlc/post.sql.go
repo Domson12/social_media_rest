@@ -15,17 +15,21 @@ INSERT INTO posts (
 title,
 body,
 user_id,
+likes,
+comments_count,
 status
 ) VALUES (
-$1, $2, $3, $4
-) RETURNING id, title, body, user_id, status, created_at
+$1, $2, $3, $4, $5, $6
+) RETURNING id, title, body, likes, comments_count, user_id, status, created_at
 `
 
 type CreatePostParams struct {
-	Title  sql.NullString `json:"title"`
-	Body   sql.NullString `json:"body"`
-	UserID int32          `json:"user_id"`
-	Status string         `json:"status"`
+	Title         sql.NullString `json:"title"`
+	Body          sql.NullString `json:"body"`
+	UserID        int32          `json:"user_id"`
+	Likes         int32          `json:"likes"`
+	CommentsCount int32          `json:"comments_count"`
+	Status        string         `json:"status"`
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
@@ -33,6 +37,8 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		arg.Title,
 		arg.Body,
 		arg.UserID,
+		arg.Likes,
+		arg.CommentsCount,
 		arg.Status,
 	)
 	var i Post
@@ -40,6 +46,8 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		&i.ID,
 		&i.Title,
 		&i.Body,
+		&i.Likes,
+		&i.CommentsCount,
 		&i.UserID,
 		&i.Status,
 		&i.CreatedAt,
@@ -57,7 +65,7 @@ func (q *Queries) DeletePost(ctx context.Context, id int32) error {
 }
 
 const getPost = `-- name: GetPost :one
-SELECT id, title, body, user_id, status, created_at FROM posts 
+SELECT id, title, body, likes, comments_count, user_id, status, created_at FROM posts 
 WHERE id = $1 LIMIT 1
 `
 
@@ -68,6 +76,8 @@ func (q *Queries) GetPost(ctx context.Context, id int32) (Post, error) {
 		&i.ID,
 		&i.Title,
 		&i.Body,
+		&i.Likes,
+		&i.CommentsCount,
 		&i.UserID,
 		&i.Status,
 		&i.CreatedAt,
@@ -76,7 +86,7 @@ func (q *Queries) GetPost(ctx context.Context, id int32) (Post, error) {
 }
 
 const getPosts = `-- name: GetPosts :many
-SELECT id, title, body, user_id, status, created_at FROM posts
+SELECT id, title, body, likes, comments_count, user_id, status, created_at FROM posts
 LIMIT $1 OFFSET $2
 `
 
@@ -98,6 +108,8 @@ func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, err
 			&i.ID,
 			&i.Title,
 			&i.Body,
+			&i.Likes,
+			&i.CommentsCount,
 			&i.UserID,
 			&i.Status,
 			&i.CreatedAt,
@@ -120,7 +132,7 @@ UPDATE posts SET
 title = $2,
 body = $3
 WHERE id = $1
-RETURNING id, title, body, user_id, status, created_at
+RETURNING id, title, body, likes, comments_count, user_id, status, created_at
 `
 
 type UpdatePostParams struct {
@@ -136,6 +148,8 @@ func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, e
 		&i.ID,
 		&i.Title,
 		&i.Body,
+		&i.Likes,
+		&i.CommentsCount,
 		&i.UserID,
 		&i.Status,
 		&i.CreatedAt,

@@ -21,7 +21,7 @@ role,
 last_activity_at
 ) VALUES (
 $1, $2, $3, $4, $5, $6
-) RETURNING id, username, email, profile_picture, bio, role, last_activity_at, created_at
+) RETURNING id, username, email, bio, role, profile_picture, created_at, last_activity_at
 `
 
 type CreateAccountParams struct {
@@ -47,11 +47,11 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (U
 		&i.ID,
 		&i.Username,
 		&i.Email,
-		&i.ProfilePicture,
 		&i.Bio,
 		&i.Role,
-		&i.LastActivityAt,
+		&i.ProfilePicture,
 		&i.CreatedAt,
+		&i.LastActivityAt,
 	)
 	return i, err
 }
@@ -66,7 +66,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, id int32) error {
 }
 
 const getAccount = `-- name: GetAccount :one
-SELECT id, username, email, profile_picture, bio, role, last_activity_at, created_at FROM users 
+SELECT id, username, email, bio, role, profile_picture, created_at, last_activity_at FROM users 
 WHERE id = $1 LIMIT 1
 `
 
@@ -77,17 +77,17 @@ func (q *Queries) GetAccount(ctx context.Context, id int32) (User, error) {
 		&i.ID,
 		&i.Username,
 		&i.Email,
-		&i.ProfilePicture,
 		&i.Bio,
 		&i.Role,
-		&i.LastActivityAt,
+		&i.ProfilePicture,
 		&i.CreatedAt,
+		&i.LastActivityAt,
 	)
 	return i, err
 }
 
 const getAccountByUsername = `-- name: GetAccountByUsername :one
-SELECT id, username, email, profile_picture, bio, role, last_activity_at, created_at FROM users WHERE username = $1 LIMIT 1
+SELECT id, username, email, bio, role, profile_picture, created_at, last_activity_at FROM users WHERE username = $1 LIMIT 1
 `
 
 func (q *Queries) GetAccountByUsername(ctx context.Context, username sql.NullString) (User, error) {
@@ -97,17 +97,17 @@ func (q *Queries) GetAccountByUsername(ctx context.Context, username sql.NullStr
 		&i.ID,
 		&i.Username,
 		&i.Email,
-		&i.ProfilePicture,
 		&i.Bio,
 		&i.Role,
-		&i.LastActivityAt,
+		&i.ProfilePicture,
 		&i.CreatedAt,
+		&i.LastActivityAt,
 	)
 	return i, err
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, username, email, profile_picture, bio, role, last_activity_at, created_at FROM users
+SELECT id, username, email, bio, role, profile_picture, created_at, last_activity_at FROM users
 LIMIT $1 OFFSET $2
 `
 
@@ -129,11 +129,11 @@ func (q *Queries) GetUsers(ctx context.Context, arg GetUsersParams) ([]User, err
 			&i.ID,
 			&i.Username,
 			&i.Email,
-			&i.ProfilePicture,
 			&i.Bio,
 			&i.Role,
-			&i.LastActivityAt,
+			&i.ProfilePicture,
 			&i.CreatedAt,
+			&i.LastActivityAt,
 		); err != nil {
 			return nil, err
 		}
@@ -155,7 +155,7 @@ email = $3,
 profile_picture = $4,
 bio = $5
 WHERE id = $1
-RETURNING id, username, email, profile_picture, bio, role, last_activity_at, created_at
+RETURNING id, username, email, bio, role, profile_picture, created_at, last_activity_at
 `
 
 type UpdateAccountParams struct {
@@ -179,11 +179,11 @@ func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (U
 		&i.ID,
 		&i.Username,
 		&i.Email,
-		&i.ProfilePicture,
 		&i.Bio,
 		&i.Role,
-		&i.LastActivityAt,
+		&i.ProfilePicture,
 		&i.CreatedAt,
+		&i.LastActivityAt,
 	)
 	return i, err
 }

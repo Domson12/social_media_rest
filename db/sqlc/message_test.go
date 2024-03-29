@@ -12,10 +12,12 @@ func CreateRandomMessage(t *testing.T) Message {
 
 	user1 := createRandomUser(t)
 	user2 := createRandomUser(t)
+	chatRoom := CreateRandomChatRoom(t)
 
 	arg := CreateMessageParams{
 		SenderUserID:   user1.ID,
 		ReceiverUserID: user2.ID,
+		ChatRoomID:     chatRoom.ID,
 		Text:           sql.NullString{String: "Hello", Valid: true},
 		Status:         "sent",
 	}

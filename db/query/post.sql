@@ -3,9 +3,11 @@ INSERT INTO posts (
 title,
 body,
 user_id,
+likes,
+comments_count,
 status
 ) VALUES (
-$1, $2, $3, $4
+$1, $2, $3, $4, $5, $6
 ) RETURNING *;
 
 -- name: GetPost :one

@@ -8,13 +8,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func CreateRandomPost(t *testing.T) Post {
+func createRandomPost(t *testing.T) Post {
 	user := createRandomUser(t)
 	arg := CreatePostParams{
-		Title:  sql.NullString{String: "Hello", Valid: true},
-		Body:   sql.NullString{String: "Hello", Valid: true},
-		UserID: user.ID,
-		Status: "active",
+		Title:         sql.NullString{String: "Hello", Valid: true},
+		Body:          sql.NullString{String: "Hello", Valid: true},
+		UserID:        user.ID,
+		Likes:         0,
+		CommentsCount: 0,
+		Status:        "active",
 	}
 	post, err := testQueries.CreatePost(context.Background(), arg)
 	require.NoError(t, err)
@@ -24,11 +26,11 @@ func CreateRandomPost(t *testing.T) Post {
 
 }
 func TestAddPost(t *testing.T) {
-	CreateRandomPost(t)
+	createRandomPost(t)
 }
 
 func TestGetPost(t *testing.T) {
-	post1 := CreateRandomPost(t)
+	post1 := createRandomPost(t)
 	post2, err := testQueries.GetPost(context.Background(), post1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, post2)
@@ -40,7 +42,7 @@ func TestGetPost(t *testing.T) {
 
 func TestGetPosts(t *testing.T) {
 	for i := 0; i < 10; i++ {
-		CreateRandomPost(t)
+		createRandomPost(t)
 	}
 
 	arg := GetPostsParams{
@@ -57,7 +59,7 @@ func TestGetPosts(t *testing.T) {
 }
 
 func TestUpdatePost(t *testing.T) {
-	post1 := CreateRandomPost(t)
+	post1 := createRandomPost(t)
 	arg := UpdatePostParams{
 		ID:    post1.ID,
 		Title: sql.NullString{String: "Hello", Valid: true},
@@ -73,7 +75,7 @@ func TestUpdatePost(t *testing.T) {
 }
 
 func TestDeletePost(t *testing.T) {
-	post1 := CreateRandomPost(t)
+	post1 := createRandomPost(t)
 	err := testQueries.DeletePost(context.Background(), post1.ID)
 	require.NoError(t, err)
 

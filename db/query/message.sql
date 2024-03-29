@@ -2,10 +2,11 @@
 INSERT INTO messages (
 sender_user_id,
 receiver_user_id,
+chat_room_id,
 text,
 status
 ) VALUES (
-$1, $2, $3, $4
+$1, $2, $3, $4, $5
 ) RETURNING *;
 
 -- name: GetMessage :one
