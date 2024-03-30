@@ -8,24 +8,19 @@ import (
 
 	"github.com/Domson12/social_media_rest/util"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func createRandomUser(t *testing.T) User {
 	username := util.RandomOwner()
 	bio := util.RandomString(6)
 
-	// Generate a random password
-	password := util.RandomString(6)
-
-	// Hash the password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := util.HashPassword(util.RandomString(6))
 	require.NoError(t, err)
 
 	arg := CreateUserParams{
 		Username:       sql.NullString{String: username, Valid: true},
 		Email:          util.RandomEmail(),
-		Password:       string(hashedPassword),
+		Password:       hashedPassword,
 		ProfilePicture: sql.NullString{String: "profile_picture", Valid: true},
 		Bio:            sql.NullString{String: bio, Valid: true},
 		Role:           "user",

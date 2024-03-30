@@ -6,20 +6,21 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Domson12/social_media_rest/util"
 	_ "github.com/lib/pq"
-)
-
-const (
-	dbDriver = "postgres"
-	dbSource = "postgresql://root:secret@localhost:5432/simple_social_media?sslmode=disable"
 )
 
 var testQueries *Queries
 var testDB *sql.DB
 
 func TestMain(m *testing.M) {
+	config, err1 := util.LoadConfig("../..")
+	if err1 != nil {
+		log.Fatal("cannot load config: ", err1)
+	}
+
 	var err error
-	testDB, err = sql.Open(dbDriver, dbSource)
+	testDB, err = sql.Open(config.DBDriver, config.DBSource)
 
 	if err != nil {
 		log.Fatal("cannot connect to db: ", err)

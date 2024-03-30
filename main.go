@@ -8,17 +8,17 @@ import (
 
 	"github.com/Domson12/social_media_rest/api"
 	db "github.com/Domson12/social_media_rest/db/sqlc"
-)
-
-const (
-	dbDriver      = "postgres"
-	dbSource      = "postgresql://root:secret@localhost:5432/simple_social_media?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
+	"github.com/Domson12/social_media_rest/util"
 )
 
 func main() {
+	config, err1 := util.LoadConfig(".")
+	if err1 != nil {
+		log.Fatal("cannot load config: ", err1)
+	}
+
 	var err error
-	conn, err := sql.Open(dbDriver, dbSource)
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
 
 	if err != nil {
 		log.Fatal("cannot connect to db: ", err)
@@ -27,7 +27,7 @@ func main() {
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
 
-	err = server.Start(serverAddress)
+	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("cannot start server: ", err)
 	}
