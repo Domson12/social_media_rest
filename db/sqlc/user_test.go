@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"testing"
 	"time"
 
@@ -14,7 +15,7 @@ func createRandomUser(t *testing.T) User {
 	username := util.RandomOwner()
 	bio := util.RandomString(6)
 
-	hashedPassword, err := util.HashPassword(util.RandomString(6))
+	hashedPassword, err := util.HashPassword("secret")
 	require.NoError(t, err)
 
 	arg := CreateUserParams{
@@ -52,6 +53,22 @@ func TestGetUser(t *testing.T) {
 
 	require.Equal(t, user1.Username, user2.Username)
 	require.Equal(t, user1.Email, user2.Email)
+	require.Equal(t, user1.ProfilePicture, user2.ProfilePicture)
+	require.Equal(t, user1.Bio, user2.Bio)
+	require.Equal(t, user1.Role, user2.Role)
+}
+
+func TestGetUserByEmail(t *testing.T) {
+	user1 := createRandomUser(t)
+	user2, err := testQueries.GetUserByEmail(context.Background(), user1.Email)
+
+	fmt.Println(user1.Password)
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+
+	require.Equal(t, user1.Username, user2.Username)
+	require.Equal(t, user1.Email, user2.Email)
+	require.Equal(t, user1.Password, user2.Password)
 	require.Equal(t, user1.ProfilePicture, user2.ProfilePicture)
 	require.Equal(t, user1.Bio, user2.Bio)
 	require.Equal(t, user1.Role, user2.Role)

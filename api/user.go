@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -27,23 +28,21 @@ type createUserResponse struct {
 func (Server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 
-	hashedPassword, err := util.HashPassword(req.Password)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	// Enhanced error handling for JSON parsing
+	// First bind JSON to req
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		// Log the error for debugging purposes
 		log.Printf("Error parsing JSON: %v", err)
-
-		// Check if the error is due to EOF
 		if err == io.EOF {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Request body cannot be empty"})
 		} else {
-			// Handle other types of JSON parsing errors
 			ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		}
+		return
+	}
+
+	// Now hash the password from the req object
+	hashedPassword, err := util.HashPassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -219,4 +218,59 @@ func (Server *Server) updateUsername(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, user)
+}
+
+type loginRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type loginResponse struct {
+	Token string          `json:"token"`
+	User  getUserResponse `json:"user"`
+}
+
+func (Server *Server) login(ctx *gin.Context) {
+	var req loginRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	user, err := Server.store.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials or user does not exist"})
+		return
+	}
+
+	err = util.CheckPasswordHash(req.Password, user.Password)
+	fmt.Println(user.Password)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Credentials"})
+		return
+	}
+
+	token, err := Server.tokenMaker.CreateToken(user.ID, time.Minute*15)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	rsp := loginResponse{
+		Token: token,
+		User: getUserResponse{
+			Username:       user.Username,
+			Email:          user.Email,
+			FollowingCount: user.FollowingCount,
+			FollowedCount:  user.FollowedCount,
+			Bio:            user.Bio,
+			Role:           user.Role,
+			ProfilePicture: user.ProfilePicture,
+			CreatedAt:      user.CreatedAt,
+			LastActivityAt: user.LastActivityAt,
+		},
+	}
+
+	ctx.JSON(http.StatusOK, rsp)
 }
