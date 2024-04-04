@@ -3,8 +3,8 @@ INSERT INTO posts (
 title,
 body,
 user_id,
-likes_count,
-comments_count,
+likes_ids,
+comments_ids,
 status
 ) VALUES (
 $1, $2, $3, $4, $5, $6
@@ -24,6 +24,22 @@ title = $2,
 body = $3
 WHERE id = $1
 RETURNING *;
+
+-- name: AddLikeToPost :exec
+UPDATE posts SET likes_ids = array_append(likes_ids, $2)
+WHERE id = $1;
+
+-- name: RemoveLikeFromPost :exec
+UPDATE posts SET likes_ids = array_remove(likes_ids, $2)
+WHERE id = $1;
+
+-- name: AddCommentToPost :exec
+UPDATE posts SET comments_ids = array_append(comments_ids, $2)
+WHERE id = $1;
+
+-- name: RemoveCommentFromPost :exec
+UPDATE posts SET comments_ids = array_remove(comments_ids, $2)
+WHERE id = $1;
 
 -- name: DeletePost :exec
 DELETE FROM posts WHERE id = $1;

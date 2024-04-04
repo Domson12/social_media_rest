@@ -14,21 +14,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// createUserRequest represents the request to create a new user
 type createUserRequest struct {
 	Username string `json:"username" binding:"required"`
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
+// createUserResponse represents the response of a successful user creation
 type createUserResponse struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 }
 
+// createUser is a handler function that creates a new user
 func (Server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 
-	// First bind JSON to req
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Printf("Error parsing JSON: %v", err)
 		if err == io.EOF {
@@ -39,7 +41,6 @@ func (Server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	// Now hash the password from the req object
 	hashedPassword, err := util.HashPassword(req.Password)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -66,16 +67,16 @@ func (Server *Server) createUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
+// getUserRequest represents the request to get a user
 type getUserRequest struct {
 	ID int32 `uri:"id" binding:"required,min=1"`
 }
 
+// getUserResponse represents the response of a successful user retrieval
 type getUserResponse struct {
 	ID             int32          `json:"id"`
 	Username       sql.NullString `json:"username"`
 	Email          string         `json:"email"`
-	FollowingCount sql.NullInt32  `json:"following_count"`
-	FollowedCount  sql.NullInt32  `json:"followed_count"`
 	Bio            sql.NullString `json:"bio"`
 	Role           string         `json:"role"`
 	ProfilePicture sql.NullString `json:"profile_picture"`
@@ -83,6 +84,7 @@ type getUserResponse struct {
 	LastActivityAt time.Time      `json:"last_activity_at"`
 }
 
+// getUser is a handler function that retrieves a user
 func (Server *Server) getUser(ctx *gin.Context) {
 	var req getUserRequest
 
@@ -111,8 +113,6 @@ func (Server *Server) getUser(ctx *gin.Context) {
 		ID:             user.ID,
 		Username:       user.Username,
 		Email:          user.Email,
-		FollowingCount: user.FollowingCount,
-		FollowedCount:  user.FollowedCount,
 		Bio:            user.Bio,
 		Role:           user.Role,
 		ProfilePicture: user.ProfilePicture,
@@ -123,11 +123,13 @@ func (Server *Server) getUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
+// getUsersRequest represents the request to get a list of users
 type getUsersRequest struct {
 	PageID int32 `form:"page_id" binding:"required,min=1"`
 	PageSz int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
+// getUsersResponse represents the response of a successful user retrieval
 func (Server *Server) getUsers(ctx *gin.Context) {
 	var req getUsersRequest
 
@@ -153,8 +155,6 @@ func (Server *Server) getUsers(ctx *gin.Context) {
 			ID:             user.ID,
 			Username:       user.Username,
 			Email:          user.Email,
-			FollowingCount: user.FollowingCount,
-			FollowedCount:  user.FollowedCount,
 			Bio:            user.Bio,
 			Role:           user.Role,
 			ProfilePicture: user.ProfilePicture,
@@ -166,10 +166,12 @@ func (Server *Server) getUsers(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
+// deleteUserRequest represents the request to delete a user
 type deleteUserRequest struct {
 	ID int32 `uri:"id" binding:"required,min=1"`
 }
 
+// deleteUser is a handler function that deletes a user
 func (Server *Server) deleteUser(ctx *gin.Context) {
 	var req deleteUserRequest
 
@@ -193,11 +195,13 @@ func (Server *Server) deleteUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "deleted"})
 }
 
+// updateUsernameRequest represents the request to update a user's username
 type updateUsernameRequest struct {
 	ID       int32  `uri:"id" binding:"required,min=1"`
 	Username string `json:"username" binding:"required"`
 }
 
+// updateUsername is a handler function that updates a user's username
 func (Server *Server) updateUsername(ctx *gin.Context) {
 	var req updateUsernameRequest
 
@@ -220,16 +224,19 @@ func (Server *Server) updateUsername(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, user)
 }
 
+// loginRequest represents the request to login a user
 type loginRequest struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
+// loginResponse represents the response of a successful user login
 type loginResponse struct {
 	Token string          `json:"token"`
 	User  getUserResponse `json:"user"`
 }
 
+// login is a handler function that logs in a user
 func (Server *Server) login(ctx *gin.Context) {
 	var req loginRequest
 
@@ -262,8 +269,6 @@ func (Server *Server) login(ctx *gin.Context) {
 		User: getUserResponse{
 			Username:       user.Username,
 			Email:          user.Email,
-			FollowingCount: user.FollowingCount,
-			FollowedCount:  user.FollowedCount,
 			Bio:            user.Bio,
 			Role:           user.Role,
 			ProfilePicture: user.ProfilePicture,

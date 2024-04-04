@@ -8,28 +8,60 @@ package db
 import (
 	"context"
 	"database/sql"
+
+	"github.com/lib/pq"
 )
+
+const addCommentToPost = `-- name: AddCommentToPost :exec
+UPDATE posts SET comments_ids = array_append(comments_ids, $2)
+WHERE id = $1
+`
+
+type AddCommentToPostParams struct {
+	ID          int32       `json:"id"`
+	ArrayAppend interface{} `json:"array_append"`
+}
+
+func (q *Queries) AddCommentToPost(ctx context.Context, arg AddCommentToPostParams) error {
+	_, err := q.exec(ctx, q.addCommentToPostStmt, addCommentToPost, arg.ID, arg.ArrayAppend)
+	return err
+}
+
+const addLikeToPost = `-- name: AddLikeToPost :exec
+UPDATE posts SET likes_ids = array_append(likes_ids, $2)
+WHERE id = $1
+`
+
+type AddLikeToPostParams struct {
+	ID          int32       `json:"id"`
+	ArrayAppend interface{} `json:"array_append"`
+}
+
+func (q *Queries) AddLikeToPost(ctx context.Context, arg AddLikeToPostParams) error {
+	_, err := q.exec(ctx, q.addLikeToPostStmt, addLikeToPost, arg.ID, arg.ArrayAppend)
+	return err
+}
 
 const createPost = `-- name: CreatePost :one
 INSERT INTO posts (
 title,
 body,
 user_id,
-likes_count,
-comments_count,
+likes_ids,
+comments_ids,
 status
 ) VALUES (
 $1, $2, $3, $4, $5, $6
-) RETURNING id, title, body, likes_count, comments_count, user_id, status, created_at
+) RETURNING id, title, body, likes_ids, comments_ids, user_id, status, created_at
 `
 
 type CreatePostParams struct {
-	Title         sql.NullString `json:"title"`
-	Body          sql.NullString `json:"body"`
-	UserID        int32          `json:"user_id"`
-	LikesCount    int32          `json:"likes_count"`
-	CommentsCount int32          `json:"comments_count"`
-	Status        string         `json:"status"`
+	Title       sql.NullString `json:"title"`
+	Body        sql.NullString `json:"body"`
+	UserID      int32          `json:"user_id"`
+	LikesIds    []int32        `json:"likes_ids"`
+	CommentsIds []int32        `json:"comments_ids"`
+	Status      string         `json:"status"`
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
@@ -37,8 +69,8 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		arg.Title,
 		arg.Body,
 		arg.UserID,
-		arg.LikesCount,
-		arg.CommentsCount,
+		pq.Array(arg.LikesIds),
+		pq.Array(arg.CommentsIds),
 		arg.Status,
 	)
 	var i Post
@@ -46,8 +78,8 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		&i.ID,
 		&i.Title,
 		&i.Body,
-		&i.LikesCount,
-		&i.CommentsCount,
+		pq.Array(&i.LikesIds),
+		pq.Array(&i.CommentsIds),
 		&i.UserID,
 		&i.Status,
 		&i.CreatedAt,
@@ -65,7 +97,7 @@ func (q *Queries) DeletePost(ctx context.Context, id int32) error {
 }
 
 const getPost = `-- name: GetPost :one
-SELECT id, title, body, likes_count, comments_count, user_id, status, created_at FROM posts 
+SELECT id, title, body, likes_ids, comments_ids, user_id, status, created_at FROM posts 
 WHERE id = $1 LIMIT 1
 `
 
@@ -76,8 +108,8 @@ func (q *Queries) GetPost(ctx context.Context, id int32) (Post, error) {
 		&i.ID,
 		&i.Title,
 		&i.Body,
-		&i.LikesCount,
-		&i.CommentsCount,
+		pq.Array(&i.LikesIds),
+		pq.Array(&i.CommentsIds),
 		&i.UserID,
 		&i.Status,
 		&i.CreatedAt,
@@ -86,7 +118,7 @@ func (q *Queries) GetPost(ctx context.Context, id int32) (Post, error) {
 }
 
 const getPosts = `-- name: GetPosts :many
-SELECT id, title, body, likes_count, comments_count, user_id, status, created_at FROM posts
+SELECT id, title, body, likes_ids, comments_ids, user_id, status, created_at FROM posts
 LIMIT $1 OFFSET $2
 `
 
@@ -108,8 +140,8 @@ func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, err
 			&i.ID,
 			&i.Title,
 			&i.Body,
-			&i.LikesCount,
-			&i.CommentsCount,
+			pq.Array(&i.LikesIds),
+			pq.Array(&i.CommentsIds),
 			&i.UserID,
 			&i.Status,
 			&i.CreatedAt,
@@ -127,12 +159,42 @@ func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, err
 	return items, nil
 }
 
+const removeCommentFromPost = `-- name: RemoveCommentFromPost :exec
+UPDATE posts SET comments_ids = array_remove(comments_ids, $2)
+WHERE id = $1
+`
+
+type RemoveCommentFromPostParams struct {
+	ID          int32       `json:"id"`
+	ArrayRemove interface{} `json:"array_remove"`
+}
+
+func (q *Queries) RemoveCommentFromPost(ctx context.Context, arg RemoveCommentFromPostParams) error {
+	_, err := q.exec(ctx, q.removeCommentFromPostStmt, removeCommentFromPost, arg.ID, arg.ArrayRemove)
+	return err
+}
+
+const removeLikeFromPost = `-- name: RemoveLikeFromPost :exec
+UPDATE posts SET likes_ids = array_remove(likes_ids, $2)
+WHERE id = $1
+`
+
+type RemoveLikeFromPostParams struct {
+	ID          int32       `json:"id"`
+	ArrayRemove interface{} `json:"array_remove"`
+}
+
+func (q *Queries) RemoveLikeFromPost(ctx context.Context, arg RemoveLikeFromPostParams) error {
+	_, err := q.exec(ctx, q.removeLikeFromPostStmt, removeLikeFromPost, arg.ID, arg.ArrayRemove)
+	return err
+}
+
 const updatePost = `-- name: UpdatePost :one
 UPDATE posts SET
 title = $2,
 body = $3
 WHERE id = $1
-RETURNING id, title, body, likes_count, comments_count, user_id, status, created_at
+RETURNING id, title, body, likes_ids, comments_ids, user_id, status, created_at
 `
 
 type UpdatePostParams struct {
@@ -148,8 +210,8 @@ func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, e
 		&i.ID,
 		&i.Title,
 		&i.Body,
-		&i.LikesCount,
-		&i.CommentsCount,
+		pq.Array(&i.LikesIds),
+		pq.Array(&i.CommentsIds),
 		&i.UserID,
 		&i.Status,
 		&i.CreatedAt,

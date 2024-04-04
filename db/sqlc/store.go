@@ -46,12 +46,6 @@ type CreateChatRoomTxResult struct {
 	ChatRoom ChatRoom `json:"chat_room"`
 }
 
-type CreateMessageTxParams struct {
-	SenderUserID int32  `json:"sender_user_id"`
-	ChatRoomID   int32  `json:"chat_room_id"`
-	Text         string `json:"text"`
-}
-
 type CreateMessageTxResult struct {
 	Message Message `json:"message"`
 }
@@ -81,4 +75,86 @@ func (store *Store) CreateChatRoomTx(ctx context.Context, arg CreateChatRoomTxPa
 	})
 
 	return result, err
+}
+
+// add like to a post and update the post's like_id array
+func (store *Store) AddLikeToPostTx(ctx context.Context, postID int32, userID int32) error {
+	return store.execTx(ctx, func(q *Queries) error {
+		err := q.LikePost(ctx, LikePostParams{
+			PostID: postID,
+			UserID: userID,
+		})
+		if err != nil {
+			return err
+		}
+
+		err = q.AddLikeToPost(ctx, AddLikeToPostParams{
+			ID: postID,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+// remove like from a post and update the post's like_id array
+func (store *Store) RemoveLikeFromPostTx(ctx context.Context, postID int32, userID int32) error {
+	return store.execTx(ctx, func(q *Queries) error {
+		err := q.UnlikePost(ctx, UnlikePostParams{
+			PostID: postID,
+			UserID: userID,
+		})
+		if err != nil {
+			return err
+		}
+
+		err = q.RemoveLikeFromPost(ctx, RemoveLikeFromPostParams{
+			ID: postID,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+// add comment to a post and update the post's comment_id array
+func (store *Store) AddCommentToPostTx(ctx context.Context, postID int32, userID int32, text string) error {
+	return store.execTx(ctx, func(q *Queries) error {
+		comment, err := q.AddComment(ctx, AddCommentParams{
+			PostID: postID,
+			UserID: userID,
+			Text:   text,
+		})
+		if err != nil {
+			return err
+		}
+
+		err = q.AddCommentToPost(ctx, AddCommentToPostParams{
+			ID: comment.ID,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+// delete comment from a post and update the post's comment_id array
+func (store *Store) DeleteCommentFromPostTx(ctx context.Context, commentID int32, postID int32) error {
+	return store.execTx(ctx, func(q *Queries) error {
+		err := q.DeleteComment(ctx, commentID)
+		if err != nil {
+			return err
+		}
+
+		err = q.RemoveCommentFromPost(ctx, RemoveCommentFromPostParams{
+			ID: postID,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 }

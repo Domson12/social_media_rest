@@ -12,6 +12,10 @@ import (
 type Querier interface {
 	AddChatRoomParticipant(ctx context.Context, arg AddChatRoomParticipantParams) (ChatRoomParticipant, error)
 	AddComment(ctx context.Context, arg AddCommentParams) (Comment, error)
+	AddCommentToPost(ctx context.Context, arg AddCommentToPostParams) error
+	// Add a follow relationship between two users
+	AddFollow(ctx context.Context, arg AddFollowParams) (Follow, error)
+	AddLikeToPost(ctx context.Context, arg AddLikeToPostParams) error
 	CreateChatRoom(ctx context.Context, name string) (ChatRoom, error)
 	CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error)
 	CreatePost(ctx context.Context, arg CreatePostParams) (Post, error)
@@ -42,6 +46,10 @@ type Querier interface {
 	GetUserByUsername(ctx context.Context, username sql.NullString) (User, error)
 	GetUsers(ctx context.Context, arg GetUsersParams) ([]User, error)
 	LikePost(ctx context.Context, arg LikePostParams) error
+	RemoveCommentFromPost(ctx context.Context, arg RemoveCommentFromPostParams) error
+	// Remove a follow relationship between two users
+	RemoveFollow(ctx context.Context, arg RemoveFollowParams) (Follow, error)
+	RemoveLikeFromPost(ctx context.Context, arg RemoveLikeFromPostParams) error
 	UnlikePost(ctx context.Context, arg UnlikePostParams) error
 	UpdateChatRoom(ctx context.Context, arg UpdateChatRoomParams) (ChatRoom, error)
 	UpdateComment(ctx context.Context, arg UpdateCommentParams) (Comment, error)

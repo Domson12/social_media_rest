@@ -22,7 +22,7 @@ role,
 last_activity_at
 ) VALUES (
 $1, $2, $3, $4, $5, $6, $7
-) RETURNING id, username, email, password, following_count, followed_count, bio, role, profile_picture, created_at, last_activity_at
+) RETURNING id, username, email, password, bio, role, profile_picture, created_at, last_activity_at
 `
 
 type CreateUserParams struct {
@@ -51,8 +51,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Username,
 		&i.Email,
 		&i.Password,
-		&i.FollowingCount,
-		&i.FollowedCount,
 		&i.Bio,
 		&i.Role,
 		&i.ProfilePicture,
@@ -72,7 +70,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, email, password, following_count, followed_count, bio, role, profile_picture, created_at, last_activity_at FROM users
+SELECT id, username, email, password, bio, role, profile_picture, created_at, last_activity_at FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -84,8 +82,6 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 		&i.Username,
 		&i.Email,
 		&i.Password,
-		&i.FollowingCount,
-		&i.FollowedCount,
 		&i.Bio,
 		&i.Role,
 		&i.ProfilePicture,
@@ -96,7 +92,7 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, email, password, following_count, followed_count, bio, role, profile_picture, created_at, last_activity_at FROM users WHERE email = $1 LIMIT 1
+SELECT id, username, email, password, bio, role, profile_picture, created_at, last_activity_at FROM users WHERE email = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -107,8 +103,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Username,
 		&i.Email,
 		&i.Password,
-		&i.FollowingCount,
-		&i.FollowedCount,
 		&i.Bio,
 		&i.Role,
 		&i.ProfilePicture,
@@ -119,7 +113,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, email, password, following_count, followed_count, bio, role, profile_picture, created_at, last_activity_at FROM users WHERE username = $1 LIMIT 1
+SELECT id, username, email, password, bio, role, profile_picture, created_at, last_activity_at FROM users WHERE username = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username sql.NullString) (User, error) {
@@ -130,8 +124,6 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username sql.NullString
 		&i.Username,
 		&i.Email,
 		&i.Password,
-		&i.FollowingCount,
-		&i.FollowedCount,
 		&i.Bio,
 		&i.Role,
 		&i.ProfilePicture,
@@ -142,7 +134,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username sql.NullString
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, username, email, password, following_count, followed_count, bio, role, profile_picture, created_at, last_activity_at FROM users
+SELECT id, username, email, password, bio, role, profile_picture, created_at, last_activity_at FROM users
 LIMIT $1 OFFSET $2
 `
 
@@ -165,8 +157,6 @@ func (q *Queries) GetUsers(ctx context.Context, arg GetUsersParams) ([]User, err
 			&i.Username,
 			&i.Email,
 			&i.Password,
-			&i.FollowingCount,
-			&i.FollowedCount,
 			&i.Bio,
 			&i.Role,
 			&i.ProfilePicture,
@@ -193,7 +183,7 @@ email = $3,
 profile_picture = $4,
 bio = $5
 WHERE id = $1
-RETURNING id, username, email, password, following_count, followed_count, bio, role, profile_picture, created_at, last_activity_at
+RETURNING id, username, email, password, bio, role, profile_picture, created_at, last_activity_at
 `
 
 type UpdateUserParams struct {
@@ -218,8 +208,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.Username,
 		&i.Email,
 		&i.Password,
-		&i.FollowingCount,
-		&i.FollowedCount,
 		&i.Bio,
 		&i.Role,
 		&i.ProfilePicture,

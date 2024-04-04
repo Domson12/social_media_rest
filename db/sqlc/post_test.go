@@ -11,12 +11,12 @@ import (
 func createRandomPost(t *testing.T) Post {
 	user := createRandomUser(t)
 	arg := CreatePostParams{
-		Title:         sql.NullString{String: "Hello", Valid: true},
-		Body:          sql.NullString{String: "Hello", Valid: true},
-		UserID:        user.ID,
-		LikesCount:    0,
-		CommentsCount: 0,
-		Status:        "active",
+		Title:       sql.NullString{String: "Hello", Valid: true},
+		Body:        sql.NullString{String: "Hello", Valid: true},
+		LikesIds:    []int32{},
+		CommentsIds: []int32{},
+		UserID:      user.ID,
+		Status:      "active",
 	}
 	post, err := testQueries.CreatePost(context.Background(), arg)
 	require.NoError(t, err)

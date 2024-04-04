@@ -30,6 +30,15 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addCommentStmt, err = db.PrepareContext(ctx, addComment); err != nil {
 		return nil, fmt.Errorf("error preparing query AddComment: %w", err)
 	}
+	if q.addCommentToPostStmt, err = db.PrepareContext(ctx, addCommentToPost); err != nil {
+		return nil, fmt.Errorf("error preparing query AddCommentToPost: %w", err)
+	}
+	if q.addFollowStmt, err = db.PrepareContext(ctx, addFollow); err != nil {
+		return nil, fmt.Errorf("error preparing query AddFollow: %w", err)
+	}
+	if q.addLikeToPostStmt, err = db.PrepareContext(ctx, addLikeToPost); err != nil {
+		return nil, fmt.Errorf("error preparing query AddLikeToPost: %w", err)
+	}
 	if q.createChatRoomStmt, err = db.PrepareContext(ctx, createChatRoom); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateChatRoom: %w", err)
 	}
@@ -120,6 +129,15 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.likePostStmt, err = db.PrepareContext(ctx, likePost); err != nil {
 		return nil, fmt.Errorf("error preparing query LikePost: %w", err)
 	}
+	if q.removeCommentFromPostStmt, err = db.PrepareContext(ctx, removeCommentFromPost); err != nil {
+		return nil, fmt.Errorf("error preparing query RemoveCommentFromPost: %w", err)
+	}
+	if q.removeFollowStmt, err = db.PrepareContext(ctx, removeFollow); err != nil {
+		return nil, fmt.Errorf("error preparing query RemoveFollow: %w", err)
+	}
+	if q.removeLikeFromPostStmt, err = db.PrepareContext(ctx, removeLikeFromPost); err != nil {
+		return nil, fmt.Errorf("error preparing query RemoveLikeFromPost: %w", err)
+	}
 	if q.unlikePostStmt, err = db.PrepareContext(ctx, unlikePost); err != nil {
 		return nil, fmt.Errorf("error preparing query UnlikePost: %w", err)
 	}
@@ -151,6 +169,21 @@ func (q *Queries) Close() error {
 	if q.addCommentStmt != nil {
 		if cerr := q.addCommentStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addCommentStmt: %w", cerr)
+		}
+	}
+	if q.addCommentToPostStmt != nil {
+		if cerr := q.addCommentToPostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addCommentToPostStmt: %w", cerr)
+		}
+	}
+	if q.addFollowStmt != nil {
+		if cerr := q.addFollowStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addFollowStmt: %w", cerr)
+		}
+	}
+	if q.addLikeToPostStmt != nil {
+		if cerr := q.addLikeToPostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addLikeToPostStmt: %w", cerr)
 		}
 	}
 	if q.createChatRoomStmt != nil {
@@ -303,6 +336,21 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing likePostStmt: %w", cerr)
 		}
 	}
+	if q.removeCommentFromPostStmt != nil {
+		if cerr := q.removeCommentFromPostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing removeCommentFromPostStmt: %w", cerr)
+		}
+	}
+	if q.removeFollowStmt != nil {
+		if cerr := q.removeFollowStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing removeFollowStmt: %w", cerr)
+		}
+	}
+	if q.removeLikeFromPostStmt != nil {
+		if cerr := q.removeLikeFromPostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing removeLikeFromPostStmt: %w", cerr)
+		}
+	}
 	if q.unlikePostStmt != nil {
 		if cerr := q.unlikePostStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing unlikePostStmt: %w", cerr)
@@ -374,6 +422,9 @@ type Queries struct {
 	tx                            *sql.Tx
 	addChatRoomParticipantStmt    *sql.Stmt
 	addCommentStmt                *sql.Stmt
+	addCommentToPostStmt          *sql.Stmt
+	addFollowStmt                 *sql.Stmt
+	addLikeToPostStmt             *sql.Stmt
 	createChatRoomStmt            *sql.Stmt
 	createMessageStmt             *sql.Stmt
 	createPostStmt                *sql.Stmt
@@ -404,6 +455,9 @@ type Queries struct {
 	getUserByUsernameStmt         *sql.Stmt
 	getUsersStmt                  *sql.Stmt
 	likePostStmt                  *sql.Stmt
+	removeCommentFromPostStmt     *sql.Stmt
+	removeFollowStmt              *sql.Stmt
+	removeLikeFromPostStmt        *sql.Stmt
 	unlikePostStmt                *sql.Stmt
 	updateChatRoomStmt            *sql.Stmt
 	updateCommentStmt             *sql.Stmt
@@ -418,6 +472,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		tx:                            tx,
 		addChatRoomParticipantStmt:    q.addChatRoomParticipantStmt,
 		addCommentStmt:                q.addCommentStmt,
+		addCommentToPostStmt:          q.addCommentToPostStmt,
+		addFollowStmt:                 q.addFollowStmt,
+		addLikeToPostStmt:             q.addLikeToPostStmt,
 		createChatRoomStmt:            q.createChatRoomStmt,
 		createMessageStmt:             q.createMessageStmt,
 		createPostStmt:                q.createPostStmt,
@@ -448,6 +505,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserByUsernameStmt:         q.getUserByUsernameStmt,
 		getUsersStmt:                  q.getUsersStmt,
 		likePostStmt:                  q.likePostStmt,
+		removeCommentFromPostStmt:     q.removeCommentFromPostStmt,
+		removeFollowStmt:              q.removeFollowStmt,
+		removeLikeFromPostStmt:        q.removeLikeFromPostStmt,
 		unlikePostStmt:                q.unlikePostStmt,
 		updateChatRoomStmt:            q.updateChatRoomStmt,
 		updateCommentStmt:             q.updateCommentStmt,

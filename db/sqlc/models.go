@@ -54,12 +54,12 @@ type Post struct {
 	ID    int32          `json:"id"`
 	Title sql.NullString `json:"title"`
 	// Content of the post
-	Body          sql.NullString `json:"body"`
-	LikesCount    int32          `json:"likes_count"`
-	CommentsCount int32          `json:"comments_count"`
-	UserID        int32          `json:"user_id"`
-	Status        string         `json:"status"`
-	CreatedAt     time.Time      `json:"created_at"`
+	Body        sql.NullString `json:"body"`
+	LikesIds    []int32        `json:"likes_ids"`
+	CommentsIds []int32        `json:"comments_ids"`
+	UserID      int32          `json:"user_id"`
+	Status      string         `json:"status"`
+	CreatedAt   time.Time      `json:"created_at"`
 }
 
 type ReadReceipt struct {
@@ -73,8 +73,6 @@ type User struct {
 	Username       sql.NullString `json:"username"`
 	Email          string         `json:"email"`
 	Password       string         `json:"password"`
-	FollowingCount sql.NullInt32  `json:"following_count"`
-	FollowedCount  sql.NullInt32  `json:"followed_count"`
 	Bio            sql.NullString `json:"bio"`
 	Role           string         `json:"role"`
 	ProfilePicture sql.NullString `json:"profile_picture"`

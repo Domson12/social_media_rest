@@ -30,11 +30,17 @@ func NewServer(config util.Config, store *db.Store) (*Server, error) {
 
 	router.POST("/users/register", server.createUser)
 	router.POST("/users/login", server.login)
-	router.POST("/users/updateUsername:id", server.updateUsername)
+	router.PUT("/users/updateUsername:id", server.updateUsername)
 	router.GET("/users/:id", server.getUser)
 	router.GET("/users", server.getUsers)
+	router.POST("/users/follow", server.followUser)
+	router.POST("/users/unfollow", server.unfollowUser)
 	router.DELETE("/users/:id", server.deleteUser)
-	router.POST("/posts", server.createPost)
+	router.POST("/posts/addPost", server.createPost)
+	router.GET("/posts/:id", server.getPost)
+	router.GET("/posts", server.getPosts)
+	router.PUT("/posts/updatePost:id", server.updatePost)
+	router.DELETE("/posts/:id", server.deletePost)
 
 	server.router = router
 	return server, nil

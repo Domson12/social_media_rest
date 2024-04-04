@@ -112,7 +112,7 @@ func TestUpdateUser(t *testing.T) {
 
 	arg := UpdateUserParams{
 		ID:             user1.ID,
-		Username:       sql.NullString{String: "updated_username", Valid: true},
+		Username:       sql.NullString{String: util.RandomOwner(), Valid: true},
 		Email:          util.RandomEmail(),
 		ProfilePicture: sql.NullString{String: "profile_picture", Valid: true},
 		Bio:            sql.NullString{String: util.RandomString(6), Valid: true},
