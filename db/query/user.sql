@@ -30,7 +30,8 @@ UPDATE users SET
 username = $2,
 email = $3,
 profile_picture = $4,
-bio = $5
+bio = $5,
+password = $6
 WHERE id = $1
 RETURNING *;
 

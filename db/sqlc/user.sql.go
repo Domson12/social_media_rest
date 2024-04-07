@@ -181,7 +181,8 @@ UPDATE users SET
 username = $2,
 email = $3,
 profile_picture = $4,
-bio = $5
+bio = $5,
+password = $6
 WHERE id = $1
 RETURNING id, username, email, password, bio, role, profile_picture, created_at, last_activity_at
 `
@@ -192,6 +193,7 @@ type UpdateUserParams struct {
 	Email          string         `json:"email"`
 	ProfilePicture sql.NullString `json:"profile_picture"`
 	Bio            sql.NullString `json:"bio"`
+	Password       string         `json:"password"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
@@ -201,6 +203,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Email,
 		arg.ProfilePicture,
 		arg.Bio,
+		arg.Password,
 	)
 	var i User
 	err := row.Scan(

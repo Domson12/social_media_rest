@@ -158,3 +158,5 @@ func (store *Store) DeleteCommentFromPostTx(ctx context.Context, commentID int32
 		return nil
 	})
 }
+
+//Delete user transaction (delete user and all related data from other tables)

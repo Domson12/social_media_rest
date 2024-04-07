@@ -196,16 +196,21 @@ func (Server *Server) deleteUser(ctx *gin.Context) {
 }
 
 // updateUsernameRequest represents the request to update a user's username
-type updateUsernameRequest struct {
+type updateUserRequest struct {
 	ID       int32  `uri:"id" binding:"required,min=1"`
 	Username string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required"`
 }
 
-// updateUsername is a handler function that updates a user's username
-func (Server *Server) updateUsername(ctx *gin.Context) {
-	var req updateUsernameRequest
+func (Server *Server) updateUser(ctx *gin.Context) {
+	var req updateUserRequest
 
 	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -213,6 +218,7 @@ func (Server *Server) updateUsername(ctx *gin.Context) {
 	arg := db.UpdateUserParams{
 		ID:       req.ID,
 		Username: sql.NullString{String: req.Username, Valid: true},
+		Email:    req.Email,
 	}
 
 	user, err := Server.store.UpdateUser(ctx, arg)
@@ -221,7 +227,18 @@ func (Server *Server) updateUsername(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	rsp := getUserResponse{
+		ID:             user.ID,
+		Username:       user.Username,
+		Email:          user.Email,
+		Bio:            user.Bio,
+		Role:           user.Role,
+		ProfilePicture: user.ProfilePicture,
+		CreatedAt:      user.CreatedAt,
+		LastActivityAt: user.LastActivityAt,
+	}
+
+	ctx.JSON(http.StatusOK, rsp)
 }
 
 // loginRequest represents the request to login a user

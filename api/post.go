@@ -17,8 +17,8 @@ type createPostRequest struct {
 
 type createPostResponse struct {
 	ID      int32  `json:"id"`
-	Title   string `json:"title"`
-	Body    string `json:"body"`
+	Title   string `json:"title" binding:"required"`
+	Body    string `json:"body" binding:"required"`
 	UserID  int32  `json:"user_id"`
 	Status  string `json:"status"`
 	Created string `json:"created"`
@@ -147,15 +147,15 @@ func (Server *Server) getPosts(ctx *gin.Context) {
 }
 
 type updatePostRequest struct {
-	ID    int32  `uri:"id" binding:"required"`
-	Title string `json:"title" binding:"required"`
-	Body  string `json:"body" binding:"required"`
+	ID    int32  `uri:"id" binding:"required" min:"1"`
+	Title string `json:"title"`
+	Body  string `json:"body"`
 }
 
 type updatePostResponse struct {
 	ID      int32  `json:"id"`
-	Title   string `json:"title"`
-	Body    string `json:"body"`
+	Title   string `json:"title" binding:"required"`
+	Body    string `json:"body" binding:"required"`
 	UserID  int32  `json:"user_id"`
 	Status  string `json:"status"`
 	Created string `json:"created"`
@@ -165,6 +165,10 @@ func (Server *Server) updatePost(ctx *gin.Context) {
 	var req updatePostRequest
 
 	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
