@@ -13,9 +13,8 @@ type followUserRequest struct {
 }
 
 type followUserResponse struct {
-	FollowingUserID int32  `json:"following_user_id"`
-	FollowedUserID  int32  `json:"followed_user_id"`
-	Created         string `json:"created"`
+	FollowingUserID int32 `json:"following_user_id"`
+	FollowedUserID  int32 `json:"followed_user_id"`
 }
 
 func (Server *Server) followUser(ctx *gin.Context) {
@@ -40,7 +39,6 @@ func (Server *Server) followUser(ctx *gin.Context) {
 	rsp := followUserResponse{
 		FollowingUserID: follow.FollowingUserID,
 		FollowedUserID:  follow.FollowedUserID,
-		Created:         follow.CreatedAt.String(),
 	}
 
 	ctx.JSON(http.StatusOK, rsp)
