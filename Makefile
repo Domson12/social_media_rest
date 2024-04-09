@@ -4,6 +4,8 @@ createdb:
 	docker exec -it postgres12  createdb --username=root --owner=root simple_social_media
 dropdb:
 	docker exec -it postgres12  dropdb simple_social_media
+cleardb:
+	docker exec -it postgres12  psql -U root -d simple_social_media -c "TRUNCATE users, posts, comments RESTART IDENTITY;"
 migrateup:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_social_media?sslmode=disable" -verbose up
 migratedown:
@@ -13,4 +15,7 @@ sqlc:
 test:
 	go test -v -cover ./...
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test
+server:
+	go run main.go
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server cleardb

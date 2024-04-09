@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"testing"
 	"time"
 
@@ -13,15 +14,21 @@ import (
 func createRandomUser(t *testing.T) User {
 	username := util.RandomOwner()
 	bio := util.RandomString(6)
-	arg := CreateAccountParams{
+
+	hashedPassword, err := util.HashPassword("secret")
+	require.NoError(t, err)
+
+	arg := CreateUserParams{
 		Username:       sql.NullString{String: username, Valid: true},
 		Email:          util.RandomEmail(),
+		Password:       hashedPassword,
 		ProfilePicture: sql.NullString{String: "profile_picture", Valid: true},
 		Bio:            sql.NullString{String: bio, Valid: true},
 		Role:           "user",
 		LastActivityAt: time.Now(),
 	}
-	user, err := testQueries.CreateAccount(context.Background(), arg)
+
+	user, err := testQueries.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
@@ -34,13 +41,13 @@ func createRandomUser(t *testing.T) User {
 	return user
 }
 
-func TestCreateAccount(t *testing.T) {
+func TestCreateUser(t *testing.T) {
 	createRandomUser(t)
 }
 
-func TestGetAccount(t *testing.T) {
+func TestGetUser(t *testing.T) {
 	user1 := createRandomUser(t)
-	user2, err := testQueries.GetAccount(context.Background(), user1.ID)
+	user2, err := testQueries.GetUser(context.Background(), user1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
@@ -51,9 +58,25 @@ func TestGetAccount(t *testing.T) {
 	require.Equal(t, user1.Role, user2.Role)
 }
 
-func TestGetAccountByUsername(t *testing.T) {
+func TestGetUserByEmail(t *testing.T) {
 	user1 := createRandomUser(t)
-	user2, err := testQueries.GetAccountByUsername(context.Background(), user1.Username)
+	user2, err := testQueries.GetUserByEmail(context.Background(), user1.Email)
+
+	fmt.Println(user1.Password)
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+
+	require.Equal(t, user1.Username, user2.Username)
+	require.Equal(t, user1.Email, user2.Email)
+	require.Equal(t, user1.Password, user2.Password)
+	require.Equal(t, user1.ProfilePicture, user2.ProfilePicture)
+	require.Equal(t, user1.Bio, user2.Bio)
+	require.Equal(t, user1.Role, user2.Role)
+}
+
+func TestGetUserByUsername(t *testing.T) {
+	user1 := createRandomUser(t)
+	user2, err := testQueries.GetUserByUsername(context.Background(), user1.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
@@ -83,19 +106,19 @@ func TestGetUsers(t *testing.T) {
 	}
 }
 
-func TestUpdateAccount(t *testing.T) {
+func TestUpdateUser(t *testing.T) {
 
 	user1 := createRandomUser(t)
 
-	arg := UpdateAccountParams{
+	arg := UpdateUserParams{
 		ID:             user1.ID,
-		Username:       sql.NullString{String: "updated_username", Valid: true},
+		Username:       sql.NullString{String: util.RandomOwner(), Valid: true},
 		Email:          util.RandomEmail(),
 		ProfilePicture: sql.NullString{String: "profile_picture", Valid: true},
 		Bio:            sql.NullString{String: util.RandomString(6), Valid: true},
 	}
 
-	user2, err := testQueries.UpdateAccount(context.Background(), arg)
+	user2, err := testQueries.UpdateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
@@ -105,13 +128,13 @@ func TestUpdateAccount(t *testing.T) {
 	require.Equal(t, arg.Bio, user2.Bio)
 }
 
-func TestDeleteAccount(t *testing.T) {
+func TestDeleteUser(t *testing.T) {
 	user1 := createRandomUser(t)
 
-	err := testQueries.DeleteAccount(context.Background(), user1.ID)
+	err := testQueries.DeleteUser(context.Background(), user1.ID)
 	require.NoError(t, err)
 
-	user2, err := testQueries.GetAccount(context.Background(), user1.ID)
+	user2, err := testQueries.GetUser(context.Background(), user1.ID)
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())
 	require.Empty(t, user2)
