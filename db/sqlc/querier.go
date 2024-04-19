@@ -27,6 +27,7 @@ type Querier interface {
 	DeleteMessage(ctx context.Context, id int32) error
 	DeletePost(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
+	DeleteUserPosts(ctx context.Context, userID int32) error
 	GetChatRoom(ctx context.Context, id int32) (ChatRoom, error)
 	GetChatRoomParticipant(ctx context.Context, userID int32) (ChatRoomParticipant, error)
 	GetChatRoomParticipants(ctx context.Context, arg GetChatRoomParticipantsParams) ([]ChatRoomParticipant, error)
@@ -46,6 +47,7 @@ type Querier interface {
 	GetUserByUsername(ctx context.Context, username sql.NullString) (User, error)
 	GetUsers(ctx context.Context, arg GetUsersParams) ([]User, error)
 	LikePost(ctx context.Context, arg LikePostParams) error
+	ListPostsByUserId(ctx context.Context, userID int32) ([]Post, error)
 	RemoveCommentFromPost(ctx context.Context, arg RemoveCommentFromPostParams) error
 	// Remove a follow relationship between two users
 	RemoveFollow(ctx context.Context, arg RemoveFollowParams) (Follow, error)
@@ -55,7 +57,14 @@ type Querier interface {
 	UpdateComment(ctx context.Context, arg UpdateCommentParams) (Comment, error)
 	UpdateMessage(ctx context.Context, arg UpdateMessageParams) (Message, error)
 	UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, error)
+	UpdatePostBody(ctx context.Context, arg UpdatePostBodyParams) (Post, error)
+	UpdatePostTitle(ctx context.Context, arg UpdatePostTitleParams) (Post, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpdateUserBio(ctx context.Context, arg UpdateUserBioParams) (User, error)
+	UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error)
+	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
+	UpdateUserProfilePicture(ctx context.Context, arg UpdateUserProfilePictureParams) (User, error)
+	UpdateUserUsername(ctx context.Context, arg UpdateUserUsernameParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

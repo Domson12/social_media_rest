@@ -72,6 +72,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteUserStmt, err = db.PrepareContext(ctx, deleteUser); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteUser: %w", err)
 	}
+	if q.deleteUserPostsStmt, err = db.PrepareContext(ctx, deleteUserPosts); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteUserPosts: %w", err)
+	}
 	if q.getChatRoomStmt, err = db.PrepareContext(ctx, getChatRoom); err != nil {
 		return nil, fmt.Errorf("error preparing query GetChatRoom: %w", err)
 	}
@@ -129,6 +132,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.likePostStmt, err = db.PrepareContext(ctx, likePost); err != nil {
 		return nil, fmt.Errorf("error preparing query LikePost: %w", err)
 	}
+	if q.listPostsByUserIdStmt, err = db.PrepareContext(ctx, listPostsByUserId); err != nil {
+		return nil, fmt.Errorf("error preparing query ListPostsByUserId: %w", err)
+	}
 	if q.removeCommentFromPostStmt, err = db.PrepareContext(ctx, removeCommentFromPost); err != nil {
 		return nil, fmt.Errorf("error preparing query RemoveCommentFromPost: %w", err)
 	}
@@ -153,8 +159,29 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updatePostStmt, err = db.PrepareContext(ctx, updatePost); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdatePost: %w", err)
 	}
+	if q.updatePostBodyStmt, err = db.PrepareContext(ctx, updatePostBody); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdatePostBody: %w", err)
+	}
+	if q.updatePostTitleStmt, err = db.PrepareContext(ctx, updatePostTitle); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdatePostTitle: %w", err)
+	}
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
+	}
+	if q.updateUserBioStmt, err = db.PrepareContext(ctx, updateUserBio); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserBio: %w", err)
+	}
+	if q.updateUserEmailStmt, err = db.PrepareContext(ctx, updateUserEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserEmail: %w", err)
+	}
+	if q.updateUserPasswordStmt, err = db.PrepareContext(ctx, updateUserPassword); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserPassword: %w", err)
+	}
+	if q.updateUserProfilePictureStmt, err = db.PrepareContext(ctx, updateUserProfilePicture); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserProfilePicture: %w", err)
+	}
+	if q.updateUserUsernameStmt, err = db.PrepareContext(ctx, updateUserUsername); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserUsername: %w", err)
 	}
 	return &q, nil
 }
@@ -239,6 +266,11 @@ func (q *Queries) Close() error {
 	if q.deleteUserStmt != nil {
 		if cerr := q.deleteUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteUserStmt: %w", cerr)
+		}
+	}
+	if q.deleteUserPostsStmt != nil {
+		if cerr := q.deleteUserPostsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteUserPostsStmt: %w", cerr)
 		}
 	}
 	if q.getChatRoomStmt != nil {
@@ -336,6 +368,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing likePostStmt: %w", cerr)
 		}
 	}
+	if q.listPostsByUserIdStmt != nil {
+		if cerr := q.listPostsByUserIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listPostsByUserIdStmt: %w", cerr)
+		}
+	}
 	if q.removeCommentFromPostStmt != nil {
 		if cerr := q.removeCommentFromPostStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing removeCommentFromPostStmt: %w", cerr)
@@ -376,9 +413,44 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updatePostStmt: %w", cerr)
 		}
 	}
+	if q.updatePostBodyStmt != nil {
+		if cerr := q.updatePostBodyStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updatePostBodyStmt: %w", cerr)
+		}
+	}
+	if q.updatePostTitleStmt != nil {
+		if cerr := q.updatePostTitleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updatePostTitleStmt: %w", cerr)
+		}
+	}
 	if q.updateUserStmt != nil {
 		if cerr := q.updateUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
+		}
+	}
+	if q.updateUserBioStmt != nil {
+		if cerr := q.updateUserBioStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserBioStmt: %w", cerr)
+		}
+	}
+	if q.updateUserEmailStmt != nil {
+		if cerr := q.updateUserEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserEmailStmt: %w", cerr)
+		}
+	}
+	if q.updateUserPasswordStmt != nil {
+		if cerr := q.updateUserPasswordStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserPasswordStmt: %w", cerr)
+		}
+	}
+	if q.updateUserProfilePictureStmt != nil {
+		if cerr := q.updateUserProfilePictureStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserProfilePictureStmt: %w", cerr)
+		}
+	}
+	if q.updateUserUsernameStmt != nil {
+		if cerr := q.updateUserUsernameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserUsernameStmt: %w", cerr)
 		}
 	}
 	return err
@@ -436,6 +508,7 @@ type Queries struct {
 	deleteMessageStmt             *sql.Stmt
 	deletePostStmt                *sql.Stmt
 	deleteUserStmt                *sql.Stmt
+	deleteUserPostsStmt           *sql.Stmt
 	getChatRoomStmt               *sql.Stmt
 	getChatRoomParticipantStmt    *sql.Stmt
 	getChatRoomParticipantsStmt   *sql.Stmt
@@ -455,6 +528,7 @@ type Queries struct {
 	getUserByUsernameStmt         *sql.Stmt
 	getUsersStmt                  *sql.Stmt
 	likePostStmt                  *sql.Stmt
+	listPostsByUserIdStmt         *sql.Stmt
 	removeCommentFromPostStmt     *sql.Stmt
 	removeFollowStmt              *sql.Stmt
 	removeLikeFromPostStmt        *sql.Stmt
@@ -463,7 +537,14 @@ type Queries struct {
 	updateCommentStmt             *sql.Stmt
 	updateMessageStmt             *sql.Stmt
 	updatePostStmt                *sql.Stmt
+	updatePostBodyStmt            *sql.Stmt
+	updatePostTitleStmt           *sql.Stmt
 	updateUserStmt                *sql.Stmt
+	updateUserBioStmt             *sql.Stmt
+	updateUserEmailStmt           *sql.Stmt
+	updateUserPasswordStmt        *sql.Stmt
+	updateUserProfilePictureStmt  *sql.Stmt
+	updateUserUsernameStmt        *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -486,6 +567,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteMessageStmt:             q.deleteMessageStmt,
 		deletePostStmt:                q.deletePostStmt,
 		deleteUserStmt:                q.deleteUserStmt,
+		deleteUserPostsStmt:           q.deleteUserPostsStmt,
 		getChatRoomStmt:               q.getChatRoomStmt,
 		getChatRoomParticipantStmt:    q.getChatRoomParticipantStmt,
 		getChatRoomParticipantsStmt:   q.getChatRoomParticipantsStmt,
@@ -505,6 +587,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserByUsernameStmt:         q.getUserByUsernameStmt,
 		getUsersStmt:                  q.getUsersStmt,
 		likePostStmt:                  q.likePostStmt,
+		listPostsByUserIdStmt:         q.listPostsByUserIdStmt,
 		removeCommentFromPostStmt:     q.removeCommentFromPostStmt,
 		removeFollowStmt:              q.removeFollowStmt,
 		removeLikeFromPostStmt:        q.removeLikeFromPostStmt,
@@ -513,6 +596,13 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		updateCommentStmt:             q.updateCommentStmt,
 		updateMessageStmt:             q.updateMessageStmt,
 		updatePostStmt:                q.updatePostStmt,
+		updatePostBodyStmt:            q.updatePostBodyStmt,
+		updatePostTitleStmt:           q.updatePostTitleStmt,
 		updateUserStmt:                q.updateUserStmt,
+		updateUserBioStmt:             q.updateUserBioStmt,
+		updateUserEmailStmt:           q.updateUserEmailStmt,
+		updateUserPasswordStmt:        q.updateUserPasswordStmt,
+		updateUserProfilePictureStmt:  q.updateUserProfilePictureStmt,
+		updateUserUsernameStmt:        q.updateUserUsernameStmt,
 	}
 }

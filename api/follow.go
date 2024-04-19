@@ -30,7 +30,7 @@ func (Server *Server) followUser(ctx *gin.Context) {
 		FollowedUserID:  req.FollowedUserID,
 	}
 
-	follow, err := Server.store.AddFollow(ctx, arg)
+	follow, err := Server.store.FollowUserTx(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

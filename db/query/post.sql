@@ -25,6 +25,18 @@ body = $3
 WHERE id = $1
 RETURNING *;
 
+-- name: UpdatePostTitle :one
+UPDATE posts SET
+title = $2
+WHERE id = $1
+RETURNING *;
+
+-- name: UpdatePostBody :one
+UPDATE posts SET
+body = $2
+WHERE id = $1
+RETURNING *;
+
 -- name: AddLikeToPost :exec
 UPDATE posts SET likes_ids = array_append(likes_ids, $2)
 WHERE id = $1;
@@ -43,3 +55,10 @@ WHERE id = $1;
 
 -- name: DeletePost :exec
 DELETE FROM posts WHERE id = $1;
+
+-- name: DeleteUserPosts :exec
+DELETE FROM posts WHERE user_id = $1;
+
+-- name: ListPostsByUserId :many
+SELECT * FROM posts
+WHERE user_id = $1;

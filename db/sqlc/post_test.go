@@ -61,9 +61,10 @@ func TestGetPosts(t *testing.T) {
 func TestUpdatePost(t *testing.T) {
 	post1 := createRandomPost(t)
 	arg := UpdatePostParams{
-		ID:    post1.ID,
-		Title: sql.NullString{String: "Hello", Valid: true},
-		Body:  sql.NullString{String: "Hello", Valid: true},
+		ID: post1.ID,
+		// //*string value
+		// Title: "Hello",
+		// Body:  "Hello",
 	}
 	post2, err := testQueries.UpdatePost(context.Background(), arg)
 	require.NoError(t, err)

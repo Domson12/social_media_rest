@@ -21,4 +21,3 @@ RETURNING *;
 
 -- name: DeleteChatRoom :exec
 DELETE FROM chat_rooms WHERE id = $1;
-

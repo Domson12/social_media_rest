@@ -17,8 +17,8 @@ type createPostRequest struct {
 
 type createPostResponse struct {
 	ID      int32  `json:"id"`
-	Title   string `json:"title" binding:"required"`
-	Body    string `json:"body" binding:"required"`
+	Title   string `json:"title"`
+	Body    string `json:"body"`
 	UserID  int32  `json:"user_id"`
 	Status  string `json:"status"`
 	Created string `json:"created"`
@@ -147,39 +147,61 @@ func (Server *Server) getPosts(ctx *gin.Context) {
 }
 
 type updatePostRequest struct {
-	ID    int32  `uri:"id" binding:"required" min:"1"`
-	Title string `json:"title"`
-	Body  string `json:"body"`
+	ID    int32   `uri:"id" binding:"required" min:"1"`
+	Title *string `json:"title,omitempty"`
+	Body  *string `json:"body,omitempty"`
 }
 
 type updatePostResponse struct {
 	ID      int32  `json:"id"`
-	Title   string `json:"title" binding:"required"`
-	Body    string `json:"body" binding:"required"`
+	Title   string `json:"title"`
+	Body    string `json:"body"`
 	UserID  int32  `json:"user_id"`
 	Status  string `json:"status"`
 	Created string `json:"created"`
 }
 
-func (Server *Server) updatePost(ctx *gin.Context) {
+func (server *Server) updatePost(ctx *gin.Context) {
 	var req updatePostRequest
 
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	arg := db.UpdatePostParams{
-		ID:    req.ID,
-		Title: sql.NullString{String: req.Title, Valid: true},
-		Body:  sql.NullString{String: req.Body, Valid: true},
+	var post db.Post
+	var err error
+
+	switch {
+	case req.Title != nil && req.Body != nil:
+		arg := db.UpdatePostParams{
+			ID:    req.ID,
+			Title: sql.NullString{String: *req.Title, Valid: true},
+			Body:  sql.NullString{String: *req.Body, Valid: true},
+		}
+		post, err = server.store.UpdatePost(ctx, arg)
+	case req.Title != nil:
+		arg := db.UpdatePostTitleParams{
+			ID:    req.ID,
+			Title: sql.NullString{String: *req.Title, Valid: true},
+		}
+		post, err = server.store.UpdatePostTitle(ctx, arg)
+	case req.Body != nil:
+		arg := db.UpdatePostBodyParams{
+			ID:   req.ID,
+			Body: sql.NullString{String: *req.Body, Valid: true},
+		}
+		post, err = server.store.UpdatePostBody(ctx, arg)
+	default:
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "No update fields provided"})
+		return
 	}
 
-	post, err := Server.store.UpdatePost(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

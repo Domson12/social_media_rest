@@ -3,7 +3,6 @@ package api
 import (
 	"database/sql"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -23,6 +22,7 @@ type createUserRequest struct {
 
 // createUserResponse represents the response of a successful user creation
 type createUserResponse struct {
+	User_id  int32  `json:"user_id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 }
@@ -33,11 +33,7 @@ func (Server *Server) createUser(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Printf("Error parsing JSON: %v", err)
-		if err == io.EOF {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Request body cannot be empty"})
-		} else {
-			ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		}
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -60,6 +56,7 @@ func (Server *Server) createUser(ctx *gin.Context) {
 	}
 
 	rsp := createUserResponse{
+		User_id:  user.ID,
 		Username: user.Username.String,
 		Email:    user.Email,
 	}
@@ -172,7 +169,7 @@ type deleteUserRequest struct {
 }
 
 // deleteUser is a handler function that deletes a user
-func (Server *Server) deleteUser(ctx *gin.Context) {
+func (server *Server) deleteUser(ctx *gin.Context) {
 	var req deleteUserRequest
 
 	if err := ctx.ShouldBindUri(&req); err != nil {
@@ -186,20 +183,22 @@ func (Server *Server) deleteUser(ctx *gin.Context) {
 		return
 	}
 
-	err = Server.store.DeleteUser(ctx, int32(id))
+	err = server.store.DeleteUserTx(ctx, int32(id))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "deleted"})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 // updateUsernameRequest represents the request to update a user's username
 type updateUserRequest struct {
 	ID       int32  `uri:"id" binding:"required,min=1"`
-	Username string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required"`
+	Username string `json:"username,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Password string `json:"password,omitempty"`
+	Bio      string `json:"bio,omitempty"`
 }
 
 func (Server *Server) updateUser(ctx *gin.Context) {
@@ -215,13 +214,15 @@ func (Server *Server) updateUser(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.UpdateUserParams{
-		ID:       req.ID,
-		Username: sql.NullString{String: req.Username, Valid: true},
+	arg := db.UpdateUserTxParams{
+		UserID:   req.ID,
+		Username: req.Username,
 		Email:    req.Email,
+		Password: req.Password,
+		Bio:      req.Bio,
 	}
 
-	user, err := Server.store.UpdateUser(ctx, arg)
+	user, err := Server.store.UpdateUserTx(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

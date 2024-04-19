@@ -35,5 +35,35 @@ password = $6
 WHERE id = $1
 RETURNING *;
 
+-- name: UpdateUserUsername :one
+UPDATE users SET
+username = $2
+WHERE id = $1
+RETURNING *;
+
+-- name: UpdateUserEmail :one
+UPDATE users SET
+email = $2
+WHERE id = $1
+RETURNING *;
+
+-- name: UpdateUserProfilePicture :one
+UPDATE users SET
+profile_picture = $2
+WHERE id = $1
+RETURNING *;
+
+-- name: UpdateUserBio :one
+UPDATE users SET
+bio = $2
+WHERE id = $1
+RETURNING *;
+
+-- name: UpdateUserPassword :one
+UPDATE users SET
+password = $2
+WHERE id = $1
+RETURNING *;
+
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;

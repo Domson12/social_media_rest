@@ -28,6 +28,16 @@ type Comment struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type FileStorage struct {
+	ID        int32          `json:"id"`
+	Filename  sql.NullString `json:"filename"`
+	FileData  []byte         `json:"file_data"`
+	MimeType  sql.NullString `json:"mime_type"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt sql.NullTime   `json:"updated_at"`
+	UserID    sql.NullInt32  `json:"user_id"`
+}
+
 type Follow struct {
 	FollowingUserID int32     `json:"following_user_id"`
 	FollowedUserID  int32     `json:"followed_user_id"`

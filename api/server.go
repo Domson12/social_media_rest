@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"io"
 
 	db "github.com/Domson12/social_media_rest/db/sqlc"
 	"github.com/Domson12/social_media_rest/token"
@@ -30,19 +31,22 @@ func NewServer(config util.Config, store *db.Store) (*Server, error) {
 
 	router.POST("/users/register", server.createUser)
 	router.POST("/users/login", server.login)
-	router.PUT("/users/:id", server.updateUser)
-	router.GET("/users/:id", server.getUser)
-	router.GET("/users", server.getUsers)
-	router.POST("/users/follow", server.followUser)
-	router.DELETE("/users/unfollow", server.unfollowUser)
-	router.DELETE("/users/:id", server.deleteUser)
-	router.POST("/posts/addPost", server.createPost)
-	router.GET("/posts/:id", server.getPost)
-	router.GET("/posts", server.getPosts)
-	router.PUT("/posts/:id", server.updatePost)
-	router.DELETE("/posts/:id", server.deletePost)
-	router.POST("/posts/like", server.likePost)
-	router.DELETE("/posts/unlike", server.unlikePost)
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	authRoutes.PUT("/users/:id", server.updateUser)
+	authRoutes.GET("/users/:id", server.getUser)
+	authRoutes.GET("/users", server.getUsers)
+	authRoutes.POST("/users/follow", server.followUser)
+	authRoutes.DELETE("/users/unfollow", server.unfollowUser)
+	authRoutes.DELETE("/users/:id", server.deleteUser)
+	authRoutes.POST("/posts/addPost", server.createPost)
+	authRoutes.GET("/posts/:id", server.getPost)
+	authRoutes.GET("/posts", server.getPosts)
+	authRoutes.PUT("/posts/:id", server.updatePost)
+	authRoutes.DELETE("/posts/:id", server.deletePost)
+	authRoutes.POST("/posts/like", server.likePost)
+	authRoutes.DELETE("/posts/unlike", server.unlikePost)
+	authRoutes.POST("/posts/comment", server.addComment)
+	authRoutes.GET("/ws", server.webSocket)
 
 	server.router = router
 	return server, nil
@@ -53,5 +57,8 @@ func (server *Server) Start(address string) error {
 }
 
 func errorResponse(err error) gin.H {
+	if err == io.EOF {
+		return gin.H{"error": "Body need to be fulfiled"}
+	}
 	return gin.H{"error": err.Error()}
 }

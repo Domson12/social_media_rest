@@ -96,6 +96,15 @@ func (q *Queries) DeletePost(ctx context.Context, id int32) error {
 	return err
 }
 
+const deleteUserPosts = `-- name: DeleteUserPosts :exec
+DELETE FROM posts WHERE user_id = $1
+`
+
+func (q *Queries) DeleteUserPosts(ctx context.Context, userID int32) error {
+	_, err := q.exec(ctx, q.deleteUserPostsStmt, deleteUserPosts, userID)
+	return err
+}
+
 const getPost = `-- name: GetPost :one
 SELECT id, title, body, likes_ids, comments_ids, user_id, status, created_at FROM posts 
 WHERE id = $1 LIMIT 1
@@ -129,6 +138,43 @@ type GetPostsParams struct {
 
 func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, error) {
 	rows, err := q.query(ctx, q.getPostsStmt, getPosts, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Post{}
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Body,
+			pq.Array(&i.LikesIds),
+			pq.Array(&i.CommentsIds),
+			&i.UserID,
+			&i.Status,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPostsByUserId = `-- name: ListPostsByUserId :many
+SELECT id, title, body, likes_ids, comments_ids, user_id, status, created_at FROM posts
+WHERE user_id = $1
+`
+
+func (q *Queries) ListPostsByUserId(ctx context.Context, userID int32) ([]Post, error) {
+	rows, err := q.query(ctx, q.listPostsByUserIdStmt, listPostsByUserId, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -205,6 +251,62 @@ type UpdatePostParams struct {
 
 func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, error) {
 	row := q.queryRow(ctx, q.updatePostStmt, updatePost, arg.ID, arg.Title, arg.Body)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Body,
+		pq.Array(&i.LikesIds),
+		pq.Array(&i.CommentsIds),
+		&i.UserID,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updatePostBody = `-- name: UpdatePostBody :one
+UPDATE posts SET
+body = $2
+WHERE id = $1
+RETURNING id, title, body, likes_ids, comments_ids, user_id, status, created_at
+`
+
+type UpdatePostBodyParams struct {
+	ID   int32          `json:"id"`
+	Body sql.NullString `json:"body"`
+}
+
+func (q *Queries) UpdatePostBody(ctx context.Context, arg UpdatePostBodyParams) (Post, error) {
+	row := q.queryRow(ctx, q.updatePostBodyStmt, updatePostBody, arg.ID, arg.Body)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Body,
+		pq.Array(&i.LikesIds),
+		pq.Array(&i.CommentsIds),
+		&i.UserID,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updatePostTitle = `-- name: UpdatePostTitle :one
+UPDATE posts SET
+title = $2
+WHERE id = $1
+RETURNING id, title, body, likes_ids, comments_ids, user_id, status, created_at
+`
+
+type UpdatePostTitleParams struct {
+	ID    int32          `json:"id"`
+	Title sql.NullString `json:"title"`
+}
+
+func (q *Queries) UpdatePostTitle(ctx context.Context, arg UpdatePostTitleParams) (Post, error) {
+	row := q.queryRow(ctx, q.updatePostTitleStmt, updatePostTitle, arg.ID, arg.Title)
 	var i Post
 	err := row.Scan(
 		&i.ID,

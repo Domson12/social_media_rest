@@ -219,3 +219,148 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 	)
 	return i, err
 }
+
+const updateUserBio = `-- name: UpdateUserBio :one
+UPDATE users SET
+bio = $2
+WHERE id = $1
+RETURNING id, username, email, password, bio, role, profile_picture, created_at, last_activity_at
+`
+
+type UpdateUserBioParams struct {
+	ID  int32          `json:"id"`
+	Bio sql.NullString `json:"bio"`
+}
+
+func (q *Queries) UpdateUserBio(ctx context.Context, arg UpdateUserBioParams) (User, error) {
+	row := q.queryRow(ctx, q.updateUserBioStmt, updateUserBio, arg.ID, arg.Bio)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.Bio,
+		&i.Role,
+		&i.ProfilePicture,
+		&i.CreatedAt,
+		&i.LastActivityAt,
+	)
+	return i, err
+}
+
+const updateUserEmail = `-- name: UpdateUserEmail :one
+UPDATE users SET
+email = $2
+WHERE id = $1
+RETURNING id, username, email, password, bio, role, profile_picture, created_at, last_activity_at
+`
+
+type UpdateUserEmailParams struct {
+	ID    int32  `json:"id"`
+	Email string `json:"email"`
+}
+
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error) {
+	row := q.queryRow(ctx, q.updateUserEmailStmt, updateUserEmail, arg.ID, arg.Email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.Bio,
+		&i.Role,
+		&i.ProfilePicture,
+		&i.CreatedAt,
+		&i.LastActivityAt,
+	)
+	return i, err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :one
+UPDATE users SET
+password = $2
+WHERE id = $1
+RETURNING id, username, email, password, bio, role, profile_picture, created_at, last_activity_at
+`
+
+type UpdateUserPasswordParams struct {
+	ID       int32  `json:"id"`
+	Password string `json:"password"`
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error) {
+	row := q.queryRow(ctx, q.updateUserPasswordStmt, updateUserPassword, arg.ID, arg.Password)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.Bio,
+		&i.Role,
+		&i.ProfilePicture,
+		&i.CreatedAt,
+		&i.LastActivityAt,
+	)
+	return i, err
+}
+
+const updateUserProfilePicture = `-- name: UpdateUserProfilePicture :one
+UPDATE users SET
+profile_picture = $2
+WHERE id = $1
+RETURNING id, username, email, password, bio, role, profile_picture, created_at, last_activity_at
+`
+
+type UpdateUserProfilePictureParams struct {
+	ID             int32          `json:"id"`
+	ProfilePicture sql.NullString `json:"profile_picture"`
+}
+
+func (q *Queries) UpdateUserProfilePicture(ctx context.Context, arg UpdateUserProfilePictureParams) (User, error) {
+	row := q.queryRow(ctx, q.updateUserProfilePictureStmt, updateUserProfilePicture, arg.ID, arg.ProfilePicture)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.Bio,
+		&i.Role,
+		&i.ProfilePicture,
+		&i.CreatedAt,
+		&i.LastActivityAt,
+	)
+	return i, err
+}
+
+const updateUserUsername = `-- name: UpdateUserUsername :one
+UPDATE users SET
+username = $2
+WHERE id = $1
+RETURNING id, username, email, password, bio, role, profile_picture, created_at, last_activity_at
+`
+
+type UpdateUserUsernameParams struct {
+	ID       int32          `json:"id"`
+	Username sql.NullString `json:"username"`
+}
+
+func (q *Queries) UpdateUserUsername(ctx context.Context, arg UpdateUserUsernameParams) (User, error) {
+	row := q.queryRow(ctx, q.updateUserUsernameStmt, updateUserUsername, arg.ID, arg.Username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.Bio,
+		&i.Role,
+		&i.ProfilePicture,
+		&i.CreatedAt,
+		&i.LastActivityAt,
+	)
+	return i, err
+}
