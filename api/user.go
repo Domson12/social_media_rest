@@ -71,14 +71,22 @@ type getUserRequest struct {
 
 // getUserResponse represents the response of a successful user retrieval
 type getUserResponse struct {
-	ID             int32          `json:"id"`
-	Username       sql.NullString `json:"username"`
-	Email          string         `json:"email"`
-	Bio            sql.NullString `json:"bio"`
-	Role           string         `json:"role"`
-	ProfilePicture sql.NullString `json:"profile_picture"`
-	CreatedAt      time.Time      `json:"created_at"`
-	LastActivityAt time.Time      `json:"last_activity_at"`
+	ID             int32     `json:"id"`
+	Username       string    `json:"username"`
+	Email          string    `json:"email"`
+	Bio            string    `json:"bio"`
+	Role           string    `json:"role"`
+	ProfilePicture string    `json:"profile_picture"`
+	CreatedAt      time.Time `json:"created_at"`
+	LastActivityAt time.Time `json:"last_activity_at"`
+}
+
+// NullStringToString converts a sql.NullString to a regular string
+func NullStringToString(ns sql.NullString) string {
+	if ns.Valid {
+		return ns.String
+	}
+	return ""
 }
 
 // getUser is a handler function that retrieves a user
@@ -108,11 +116,11 @@ func (Server *Server) getUser(ctx *gin.Context) {
 
 	rsp := getUserResponse{
 		ID:             user.ID,
-		Username:       user.Username,
+		Username:       NullStringToString(user.Username),
 		Email:          user.Email,
-		Bio:            user.Bio,
+		Bio:            NullStringToString(user.Bio),
 		Role:           user.Role,
-		ProfilePicture: user.ProfilePicture,
+		ProfilePicture: NullStringToString(user.ProfilePicture),
 		CreatedAt:      user.CreatedAt,
 		LastActivityAt: user.LastActivityAt,
 	}
@@ -127,6 +135,11 @@ type getUsersRequest struct {
 }
 
 // getUsersResponse represents the response of a successful user retrieval
+type getUsersResponse struct {
+	Users []getUserResponse `json:"users"`
+}
+
+// getUsers is a handler function that retrieves a list of users
 func (Server *Server) getUsers(ctx *gin.Context) {
 	var req getUsersRequest
 
@@ -150,17 +163,17 @@ func (Server *Server) getUsers(ctx *gin.Context) {
 	for i, user := range users {
 		rsp[i] = getUserResponse{
 			ID:             user.ID,
-			Username:       user.Username,
+			Username:       NullStringToString(user.Username),
 			Email:          user.Email,
-			Bio:            user.Bio,
+			Bio:            NullStringToString(user.Bio),
 			Role:           user.Role,
-			ProfilePicture: user.ProfilePicture,
+			ProfilePicture: NullStringToString(user.ProfilePicture),
 			CreatedAt:      user.CreatedAt,
 			LastActivityAt: user.LastActivityAt,
 		}
 	}
 
-	ctx.JSON(http.StatusOK, rsp)
+	ctx.JSON(http.StatusOK, getUsersResponse{Users: rsp})
 }
 
 // deleteUserRequest represents the request to delete a user
@@ -230,11 +243,11 @@ func (Server *Server) updateUser(ctx *gin.Context) {
 
 	rsp := getUserResponse{
 		ID:             user.ID,
-		Username:       user.Username,
+		Username:       NullStringToString(user.Username),
 		Email:          user.Email,
-		Bio:            user.Bio,
+		Bio:            NullStringToString(user.Bio),
 		Role:           user.Role,
-		ProfilePicture: user.ProfilePicture,
+		ProfilePicture: NullStringToString(user.ProfilePicture),
 		CreatedAt:      user.CreatedAt,
 		LastActivityAt: user.LastActivityAt,
 	}
@@ -285,11 +298,12 @@ func (Server *Server) login(ctx *gin.Context) {
 	rsp := loginResponse{
 		Token: token,
 		User: getUserResponse{
-			Username:       user.Username,
+			ID:             user.ID,
+			Username:       NullStringToString(user.Username),
 			Email:          user.Email,
-			Bio:            user.Bio,
+			Bio:            NullStringToString(user.Bio),
 			Role:           user.Role,
-			ProfilePicture: user.ProfilePicture,
+			ProfilePicture: NullStringToString(user.ProfilePicture),
 			CreatedAt:      user.CreatedAt,
 			LastActivityAt: user.LastActivityAt,
 		},

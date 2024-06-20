@@ -21,7 +21,7 @@ func (Server *Server) webSocket(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	defer conn.Close()
+	defer conn.Close();
 
 	for {
 		messageType, p, err := conn.ReadMessage()
