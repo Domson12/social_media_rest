@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/lib/pq"
 )
@@ -154,6 +155,85 @@ func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, err
 			&i.UserID,
 			&i.Status,
 			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostsWithUsers = `-- name: GetPostsWithUsers :many
+SELECT
+    p.id AS post_id,
+    p.title AS post_title,
+    p.body AS post_body,
+    p.status AS post_status,
+    p.created_at AS post_created_at,
+    u.id AS user_id,
+    u.username AS user_username,
+    u.email AS user_email,
+    u.bio AS user_bio,
+    u.role AS user_role,
+    u.profile_picture AS user_profile_picture,
+    u.created_at AS user_created_at,
+    u.last_activity_at AS user_last_activity_at
+FROM posts p
+JOIN users u ON p.user_id = u.id
+ORDER BY p.created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type GetPostsWithUsersParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type GetPostsWithUsersRow struct {
+	PostID             int32          `json:"post_id"`
+	PostTitle          sql.NullString `json:"post_title"`
+	PostBody           sql.NullString `json:"post_body"`
+	PostStatus         string         `json:"post_status"`
+	PostCreatedAt      time.Time      `json:"post_created_at"`
+	UserID             int32          `json:"user_id"`
+	UserUsername       sql.NullString `json:"user_username"`
+	UserEmail          string         `json:"user_email"`
+	UserBio            sql.NullString `json:"user_bio"`
+	UserRole           string         `json:"user_role"`
+	UserProfilePicture sql.NullString `json:"user_profile_picture"`
+	UserCreatedAt      time.Time      `json:"user_created_at"`
+	UserLastActivityAt time.Time      `json:"user_last_activity_at"`
+}
+
+func (q *Queries) GetPostsWithUsers(ctx context.Context, arg GetPostsWithUsersParams) ([]GetPostsWithUsersRow, error) {
+	rows, err := q.query(ctx, q.getPostsWithUsersStmt, getPostsWithUsers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetPostsWithUsersRow{}
+	for rows.Next() {
+		var i GetPostsWithUsersRow
+		if err := rows.Scan(
+			&i.PostID,
+			&i.PostTitle,
+			&i.PostBody,
+			&i.PostStatus,
+			&i.PostCreatedAt,
+			&i.UserID,
+			&i.UserUsername,
+			&i.UserEmail,
+			&i.UserBio,
+			&i.UserRole,
+			&i.UserProfilePicture,
+			&i.UserCreatedAt,
+			&i.UserLastActivityAt,
 		); err != nil {
 			return nil, err
 		}

@@ -114,6 +114,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getPostsStmt, err = db.PrepareContext(ctx, getPosts); err != nil {
 		return nil, fmt.Errorf("error preparing query GetPosts: %w", err)
 	}
+	if q.getPostsWithUsersStmt, err = db.PrepareContext(ctx, getPostsWithUsers); err != nil {
+		return nil, fmt.Errorf("error preparing query GetPostsWithUsers: %w", err)
+	}
 	if q.getReadReceiptStmt, err = db.PrepareContext(ctx, getReadReceipt); err != nil {
 		return nil, fmt.Errorf("error preparing query GetReadReceipt: %w", err)
 	}
@@ -338,6 +341,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getPostsStmt: %w", cerr)
 		}
 	}
+	if q.getPostsWithUsersStmt != nil {
+		if cerr := q.getPostsWithUsersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getPostsWithUsersStmt: %w", cerr)
+		}
+	}
 	if q.getReadReceiptStmt != nil {
 		if cerr := q.getReadReceiptStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getReadReceiptStmt: %w", cerr)
@@ -522,6 +530,7 @@ type Queries struct {
 	getMessagesStmt               *sql.Stmt
 	getPostStmt                   *sql.Stmt
 	getPostsStmt                  *sql.Stmt
+	getPostsWithUsersStmt         *sql.Stmt
 	getReadReceiptStmt            *sql.Stmt
 	getUserStmt                   *sql.Stmt
 	getUserByEmailStmt            *sql.Stmt
@@ -581,6 +590,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getMessagesStmt:               q.getMessagesStmt,
 		getPostStmt:                   q.getPostStmt,
 		getPostsStmt:                  q.getPostsStmt,
+		getPostsWithUsersStmt:         q.getPostsWithUsersStmt,
 		getReadReceiptStmt:            q.getReadReceiptStmt,
 		getUserStmt:                   q.getUserStmt,
 		getUserByEmailStmt:            q.getUserByEmailStmt,

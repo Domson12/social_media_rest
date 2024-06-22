@@ -25,6 +25,7 @@ type createUserResponse struct {
 	User_id  int32  `json:"user_id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	Token    string `json:"token"`
 }
 
 // createUser is a handler function that creates a new user
@@ -55,10 +56,17 @@ func (Server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
+	token, err := Server.tokenMaker.CreateToken(user.ID, time.Minute*15)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	rsp := createUserResponse{
 		User_id:  user.ID,
 		Username: user.Username.String,
 		Email:    user.Email,
+		Token:    token,
 	}
 
 	ctx.JSON(http.StatusOK, rsp)

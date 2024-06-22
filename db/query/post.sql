@@ -62,3 +62,23 @@ DELETE FROM posts WHERE user_id = $1;
 -- name: ListPostsByUserId :many
 SELECT * FROM posts
 WHERE user_id = $1;
+
+-- name: GetPostsWithUsers :many
+SELECT
+    p.id AS post_id,
+    p.title AS post_title,
+    p.body AS post_body,
+    p.status AS post_status,
+    p.created_at AS post_created_at,
+    u.id AS user_id,
+    u.username AS user_username,
+    u.email AS user_email,
+    u.bio AS user_bio,
+    u.role AS user_role,
+    u.profile_picture AS user_profile_picture,
+    u.created_at AS user_created_at,
+    u.last_activity_at AS user_last_activity_at
+FROM posts p
+JOIN users u ON p.user_id = u.id
+ORDER BY p.created_at DESC
+LIMIT $1 OFFSET $2;

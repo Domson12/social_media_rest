@@ -147,9 +147,10 @@ func (Server *Server) getPosts(ctx *gin.Context) {
 }
 
 type updatePostRequest struct {
-	ID    int32   `uri:"id" binding:"required" min:"1"`
-	Title *string `json:"title,omitempty"`
-	Body  *string `json:"body,omitempty"`
+	ID     int32   `uri:"id" binding:"required,min=1"`
+	Title  *string `json:"title,omitempty"`
+	Body   *string `json:"body,omitempty"`
+	Status *string `json:"status,omitempty"`
 }
 
 type updatePostResponse struct {
@@ -178,6 +179,13 @@ func (server *Server) updatePost(ctx *gin.Context) {
 	var err error
 
 	switch {
+	case req.Title != nil && req.Body != nil && req.Status != nil:
+		arg := db.UpdatePostParams{
+			ID:    req.ID,
+			Title: sql.NullString{String: *req.Title, Valid: true},
+			Body:  sql.NullString{String: *req.Body, Valid: true},
+		}
+		post, err = server.store.UpdatePost(ctx, arg)
 	case req.Title != nil && req.Body != nil:
 		arg := db.UpdatePostParams{
 			ID:    req.ID,
@@ -238,4 +246,69 @@ func (Server *Server) deletePost(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "deleted"})
+}
+
+type getPostsWithUsersRequest struct {
+	PageID int32 `form:"page_id" binding:"required,min=1"`
+	PageSz int32 `form:"page_size" binding:"required,min=5,max=10"`
+}
+
+type postWithUserResponse struct {
+	PostID             int32  `json:"post_id"`
+	PostTitle          string `json:"post_title"`
+	PostBody           string `json:"post_body"`
+	PostStatus         string `json:"post_status"`
+	PostCreatedAt      string `json:"post_created_at"`
+	UserID             int32  `json:"user_id"`
+	UserUsername       string `json:"user_username"`
+	UserEmail          string `json:"user_email"`
+	UserBio            string `json:"user_bio"`
+	UserRole           string `json:"user_role"`
+	UserProfilePicture string `json:"user_profile_picture"`
+	UserCreatedAt      string `json:"user_created_at"`
+	UserLastActivityAt string `json:"user_last_activity_at"`
+}
+
+type getPostsWithUsersResponse struct {
+	Posts []postWithUserResponse `json:"posts"`
+}
+
+func (server *Server) getPostsWithUsers(ctx *gin.Context) {
+	var req getPostsWithUsersRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.GetPostsWithUsersParams{
+		Limit:  req.PageSz,
+		Offset: (req.PageID - 1) * req.PageSz,
+	}
+
+	posts, err := server.store.GetPostsWithUsers(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	rsp := make([]postWithUserResponse, len(posts))
+	for i, post := range posts {
+		rsp[i] = postWithUserResponse{
+			PostID:             post.PostID,
+			PostTitle:          NullStringToString(post.PostTitle),
+			PostBody:           NullStringToString(post.PostBody),
+			PostStatus:         post.PostStatus,
+			PostCreatedAt:      post.PostCreatedAt.String(),
+			UserID:             post.UserID,
+			UserUsername:       post.UserUsername.String,
+			UserEmail:          post.UserEmail,
+			UserBio:            post.UserBio.String,
+			UserRole:           post.UserRole,
+			UserProfilePicture: post.UserProfilePicture.String,
+			UserCreatedAt:      post.UserCreatedAt.String(),
+			UserLastActivityAt: post.UserLastActivityAt.String(),
+		}
+	}
+
+	ctx.JSON(http.StatusOK, getPostsWithUsersResponse{Posts: rsp})
 }

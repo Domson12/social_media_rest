@@ -58,6 +58,25 @@ func TestGetPosts(t *testing.T) {
 	}
 }
 
+func TestGetPostsWithUsers(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		createRandomPost(t)
+	}
+
+	arg := GetPostsWithUsersParams{
+		Limit:  5,
+		Offset: 5,
+	}
+	posts, err := testQueries.GetPostsWithUsers(context.Background(), arg)
+	require.NoError(t, err)
+	require.Len(t, posts, 5)
+
+	for _, post := range posts {
+		require.NotEmpty(t, post)
+
+	}
+}
+
 func TestUpdatePost(t *testing.T) {
 	post1 := createRandomPost(t)
 	arg := UpdatePostParams{

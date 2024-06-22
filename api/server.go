@@ -30,7 +30,6 @@ func NewServer(config util.Config, store *db.Store) (*Server, error) {
 	router := gin.Default()
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 
-
 	router.POST("/users/register", server.createUser)
 	router.POST("/users/login", server.login)
 	authRoutes.PUT("/users/:id", server.updateUser)
@@ -42,11 +41,12 @@ func NewServer(config util.Config, store *db.Store) (*Server, error) {
 	authRoutes.POST("/posts/addPost", server.createPost)
 	authRoutes.GET("/posts/:id", server.getPost)
 	authRoutes.GET("/posts", server.getPosts)
-	authRoutes.PUT("/posts/:id", server.updatePost)
+	authRoutes.PATCH("/posts/:id", server.updatePost)
 	authRoutes.DELETE("/posts/:id", server.deletePost)
 	authRoutes.POST("/posts/like", server.likePost)
 	authRoutes.DELETE("/posts/unlike", server.unlikePost)
 	authRoutes.POST("/posts/comment", server.addComment)
+	authRoutes.GET("/posts/withUsers", server.getPostsWithUsers)
 	authRoutes.GET("/ws", server.webSocket)
 
 	server.router = router
